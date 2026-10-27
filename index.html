@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>꼬꼬마 생활</title>
+<link rel="icon" href="img/cheeks.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2F6FE4; --red: #E5484D; --accent: #FF5A00; --cream: #F2EBDB; --sand: #DECCA6;
+  --gray: #7F7F7F; --line: #D9D9D9; --yellow: #FFD84D; --pink: #F48B9B;
+  --fg: #3a3128; --muted: #8a7f72; --paper: #FAF6EC; --card: #FFFDF7;
+  --fs-cap: 16px; --fs-body: 18px; --fs-head: 22px; --fs-title: 30px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; font-family: 'Jua', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: var(--fs-body); color: var(--fg); background: var(--paper);
+  background-image: radial-gradient(rgba(222,204,166,.55) 1.2px, transparent 1.4px); background-size: 18px 18px;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+img.ch { display: block; pointer-events: none; user-select: none; height: auto; }
+
+.hero { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-radius: 24px;
+  background: linear-gradient(135deg, #FFF0B8, #FCE3E6); border: 2px solid #F2D57A; overflow: hidden; }
+.hero-text { flex: 1; min-width: 0; }
+.hero h1 { font-weight: 400; font-size: var(--fs-title); margin: 0; line-height: 1.2; }
+.hero h1 .dot { color: var(--accent); }
+.hero p { margin: 0; color: var(--muted); }
+.today { display: inline-block; background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 12px; font-size: var(--fs-cap); margin-left: 8px; vertical-align: middle; }
+.hero img.ch { width: 78px; flex: none; margin: -4px 0 -10px; transform-origin: 50% 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero img.ch { animation: bob 2.6s ease-out infinite alternate; }
+  @keyframes bob { from { transform: rotate(-3deg); } to { transform: rotate(3deg) translateY(-4px); } }
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 14px; }
+.card { background: var(--card); border: 2px dashed var(--sand); border-radius: 22px; padding: 18px; min-width: 0; }
+.card-h { display: flex; align-items: flex-end; gap: 8px; }
+.card-h img.ch { width: 64px; flex: none; margin-top: -26px; }
+.card h2 { font-size: var(--fs-head); font-weight: 400; margin: 0; }
+.note { font-size: var(--fs-cap); color: var(--muted); margin: 2px 0 12px; }
+
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.box { border-radius: 18px; padding: 12px; background: #FBF5E7; border: 2px solid var(--sand); }
+.box .lbl { font-size: var(--fs-cap); color: var(--muted); }
+.box.on { border-color: var(--accent); background: #FFEDE2; }
+.box.on .lbl::after { content: " ✨ 꼭 챙기기!"; color: var(--accent); }
+.items { margin-top: 4px; min-height: 1.4em; }
+.items small { display: block; color: var(--muted); font-size: var(--fs-cap); }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dotted var(--sand); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: var(--fs-cap); color: var(--muted); font-weight: 400; }
+.sup td:first-child { white-space: nowrap; }
+.dd { display: inline-block; font-size: var(--fs-cap); color: var(--muted); margin-left: 4px; }
+td.has { color: var(--accent); }
+.meal td:first-child { white-space: nowrap; width: 7em; }
+.slot { display: inline-block; font-size: var(--fs-cap); border-radius: 999px; padding: 1px 10px; }
+.s1 { background: #FFEFA8; } .s2 { background: #FFD5BD; } .s3 { background: #FBD3DA; } .s4 { background: #EFE3C8; }
+.empty { text-align: center !important; color: var(--muted); padding: 14px !important; }
+.empty img.ch { width: 72px; margin: 0 auto 4px; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile { background: #FBF5E7; border-radius: 18px; padding: 12px; text-align: center; min-width: 0; }
+.tile .lbl { font-size: var(--fs-cap); color: var(--muted); }
+.num { font-size: 40px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.num.blue { color: var(--blue); } .num.red { color: var(--red); }
+.badge { display: inline-block; margin-top: 4px; font-size: var(--fs-cap); padding: 2px 10px; border-radius: 999px; color: #fff; }
+.badge.blue { background: var(--blue); } .badge.red { background: var(--red); }
+.mascot { width: 76px; margin: 4px auto 0; }
+.st { font-size: var(--fs-cap); padding: 1px 8px; border-radius: 999px; border: 1px solid var(--sand); white-space: nowrap; }
+.st.done { color: var(--muted); background: #F6EFDF; }
+.st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
+
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart text { font-family: inherit; }
+.tip { position: absolute; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 4px 10px; font-size: var(--fs-cap); pointer-events: none; white-space: nowrap; }
+footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padding: 4px 0 20px; }
+.err { color: var(--red); text-align: center; padding: 40px 0; }
+
+@media (max-width: 560px) {
+  .wrap { padding: 10px; gap: 12px; }
+  .hero { padding: 8px 14px; }
+  .hero img.ch { width: 64px; }
+  .hero h1 { font-size: 26px; }
+  .tiles { grid-template-columns: 1fr 1fr; }
+  .tile:first-child { grid-column: 1 / -1; }
+  .sup thead { display: none; }
+  .sup tr { display: block; padding: 8px 4px; border-bottom: 1px dotted var(--sand); }
+  .sup tr:last-child { border-bottom: 0; }
+  .sup td { display: inline; border: 0; padding: 0 4px 0 0; }
+  .sup td.has, .sup td:last-child { display: block; padding-top: 2px; }
+  .box.on .lbl::after { content: " ✨"; }
+  .hl td { font-size: var(--fs-cap); }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header class="hero">
+    <div class="hero-text">
+      <h1>꼬꼬마 생활<span class="dot">.</span><span class="today" id="date"></span></h1>
+      <p id="takeaway">불러오는 중…</p>
+    </div>
+    <img class="ch" src="img/dance.webp" alt="">
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="card-h"><img class="ch" src="img/walk.webp" alt=""><h2>챙길 준비물</h2></div>
+      <p class="note">가정통신문(월간계획표) 기준 · 오늘 이후 일정</p>
+      <div class="pair">
+        <div class="box" id="sup-today"><div class="lbl">오늘</div><div class="items"></div></div>
+        <div class="box" id="sup-tmr"><div class="lbl">내일</div><div class="items"></div></div>
+      </div>
+      <table class="sup"><thead><tr><th>날짜</th><th>활동</th><th>준비물</th></tr></thead><tbody id="sup-list"></tbody></table>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><img class="ch" src="img/chin.webp" alt=""><h2>오늘의 간식 · 식사</h2></div>
+      <p class="note">영양식단 만 1~2세 기준 · 오늘</p>
+      <table class="meal"><thead><tr><th>구분</th><th>메뉴</th></tr></thead><tbody id="meals"></tbody></table>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-h"><img class="ch" src="img/teddy.webp" alt=""><h2>이번 달 (하원) 일정</h2></div>
+    <p class="note">구글 캘린더 공유일정 중 (하원)으로 시작하는 일정 · 매일 아침 갱신 · 8개 이상 파란색, 미만 빨간색</p>
+    <div class="tiles">
+      <div class="tile">
+        <div class="lbl">이번 달 (하원) 일정</div>
+        <div class="num" id="planned">—</div>
+        <span class="badge" id="badge" hidden></span>
+        <img class="ch mascot" id="mascot" alt="" hidden>
+      </div>
+      <div class="tile"><div class="lbl">오늘까지 실제 하원</div><div class="num" id="done">—</div></div>
+      <div class="tile"><div class="lbl">남은 하원</div><div class="num" id="left">—</div></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>월별 (하원) 일정 수</h2>
+      <p class="note">최근 6개월 + 다음 달 · 점선은 기준 8개</p>
+      <div class="chart" id="chart"></div>
+    </section>
+    <section class="card">
+      <h2>이번 달 (하원) 일정 목록</h2>
+      <p class="note">완료 = 지금 시각 이전에 지난 일정</p>
+      <table class="hl"><thead><tr><th>일시</th><th>일정</th><th>상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
+    </section>
+  </div>
+
+  <footer id="updated"></footer>
+</div>
+
+<script>
+(() => {
+  const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  const SEOUL = 9 * 3600e3;
+  const now = new Date();
+  const seoul = new Date(now.getTime() + SEOUL);
+  const today = seoul.toISOString().slice(0, 10);
+  const ym = today.slice(0, 7);
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const md = (d) => { const t = new Date(d + 'T00:00:00Z'); return (t.getUTCMonth() + 1) + '/' + t.getUTCDate() + ' (' + DOW[t.getUTCDay()] + ')'; };
+  const emptyRow = (tb, n, text) => {
+    const tr = el('tr'); const td = el('td', 'empty'); td.colSpan = n;
+    const im = el('img', 'ch'); im.src = 'img/question.webp'; im.alt = '';
+    td.append(im, document.createTextNode(text)); tr.append(td); tb.append(tr);
+  };
+  $('date').textContent = (seoul.getUTCMonth() + 1) + '월 ' + seoul.getUTCDate() + '일 (' + DOW[seoul.getUTCDay()] + ') 🐥';
+
+  fetch('data.json?v=' + Date.now(), { cache: 'no-store' })
+    .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(render)
+    .catch(() => { $('takeaway').textContent = '데이터를 불러오지 못했어요. 잠시 후 새로고침해 주세요.'; });
+
+  function render(data) {
+    // 준비물
+    const sup = (data.plan || []).filter((r) => r.date >= today).sort((a, b) => a.date.localeCompare(b.date))
+      .map((r) => ({ ...r, dday: Math.round((new Date(r.date + 'T00:00:00Z') - new Date(today + 'T00:00:00Z')) / 864e5) }));
+    const fill = (id, rows) => {
+      const box = $(id), it = box.querySelector('.items'); it.replaceChildren();
+      box.classList.toggle('on', rows.some((r) => r.items));
+      if (!rows.length) { it.textContent = '없음'; return; }
+      rows.forEach((r) => { const d = el('div', null, r.items || (r.kind === '휴원' ? '휴원' : '준비물 없음')); d.append(el('small', null, r.event)); it.append(d); });
+    };
+    fill('sup-today', sup.filter((r) => r.dday === 0));
+    fill('sup-tmr', sup.filter((r) => r.dday === 1));
+    const sl = $('sup-list');
+    if (!sup.length) emptyRow(sl, 3, '이번 달 남은 일정이 없어요');
+    sup.forEach((r) => {
+      const tr = el('tr'); const w = el('td', null, md(r.date)); w.append(el('span', 'dd', r.dday === 0 ? '오늘' : 'D-' + r.dday));
+      tr.append(w, el('td', null, r.event), el('td', r.items ? 'has' : '', r.items || '-')); sl.append(tr);
+    });
+
+    // 식단
+    const SLOT = { '오전간식': ['s1', '🍓'], '점심': ['s2', '🍚'], '오후간식': ['s3', '🧁'], '저녁': ['s4', '🌙'] };
+    const meals = (data.meals || []).filter((r) => r.date === today).sort((a, b) => a.order - b.order);
+    const mt = $('meals');
+    if (!meals.length) emptyRow(mt, 2, '오늘은 식단 정보가 없어요');
+    meals.forEach((r) => {
+      const tr = el('tr'); const td = el('td'); const [c, ic] = SLOT[r.slot] || ['s4', '•'];
+      td.append(el('span', 'slot ' + c, ic + ' ' + r.slot)); tr.append(td, el('td', null, r.menu)); mt.append(tr);
+    });
+
+    // 하원
+    const ev = (data.hawon || []).filter((r) => (r.title || '').trim().startsWith('(하원)'));
+    const months = [];
+    for (let i = -5; i <= 1; i++) months.push(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)).toISOString().slice(0, 7));
+    const byMonth = months.map((m) => {
+      const inM = ev.filter((r) => r.start.slice(0, 7) === m);
+      const done = inM.filter((r) => new Date(r.start) < now).length;
+      return { month: m, label: Number(m.slice(5)) + '월', planned: inM.length, done, upcoming: inM.length - done };
+    });
+    const cur = byMonth.find((r) => r.month === ym);
+    const ok = cur.planned >= 8;
+    $('planned').textContent = cur.planned + '개'; $('planned').className = 'num ' + (ok ? 'blue' : 'red');
+    $('done').textContent = cur.done + '개'; $('left').textContent = cur.upcoming + '개';
+    const b = $('badge'); b.hidden = false; b.className = 'badge ' + (ok ? 'blue' : 'red');
+    b.textContent = ok ? '8개 이상 · 충분해요!' : `8개 미만 · ${8 - cur.planned}개 부족`;
+    const ms = $('mascot'); ms.src = ok ? 'img/cheeks.webp' : 'img/question.webp'; ms.hidden = false;
+    $('takeaway').textContent = `이번 달 (하원) ${cur.planned}개 중 ${cur.done}개 완료, ${cur.upcoming}개 남음`;
+
+    const hl = $('hawon-list');
+    const list = ev.filter((r) => r.start.slice(0, 7) === ym).sort((a, b) => a.start.localeCompare(b.start));
+    if (!list.length) emptyRow(hl, 3, '이번 달 (하원) 일정이 없어요');
+    list.forEach((r) => {
+      const d = r.start.slice(0, 10);
+      const state = new Date(r.start) < now ? '완료' : d === today ? '오늘' : '예정';
+      const tr = el('tr'); const st = el('td'); st.append(el('span', 'st ' + (state === '완료' ? 'done' : state === '오늘' ? 'today' : ''), state));
+      tr.append(el('td', null, md(d) + (r.start.length > 10 ? ' ' + r.start.slice(11, 16) : '')), el('td', null, r.title.replace(/^\(하원\)\s*/, '')), st);
+      hl.append(tr);
+    });
+
+    drawChart(byMonth);
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawChart(byMonth), 150); });
+
+    if (data.updatedAt) {
+      const u = new Date(new Date(data.updatedAt).getTime() + SEOUL);
+      $('updated').textContent = `마지막 갱신 ${u.getUTCMonth() + 1}/${u.getUTCDate()} ${String(u.getUTCHours()).padStart(2, '0')}:${String(u.getUTCMinutes()).padStart(2, '0')} · 매일 아침 자동 갱신`;
+    }
+  }
+
+  function drawChart(rows) {
+    const box = $('chart'); box.replaceChildren();
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = Math.max(280, box.clientWidth || 320), H = 250, L = 34, R = 6, T = 22, B = 30;
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); box.append(svg);
+    const mk = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.append(e); return e; };
+    const maxY = Math.max(10, Math.ceil((Math.max(...rows.map((r) => r.planned)) + 2) / 2) * 2);
+    const y = (v) => T + (H - T - B) * (1 - v / maxY);
+    const step = maxY <= 10 ? 2 : Math.ceil(maxY / 5);
+    for (let v = 0; v <= maxY; v += step) {
+      mk('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: '#EDE4D0' });
+      mk('text', { x: L - 8, y: y(v) + 5, 'text-anchor': 'end', fill: '#8a7f72', 'font-size': 15 }, v);
+    }
+    const bw = (W - L - R) / rows.length, bar = Math.min(34, bw * 0.6);
+    const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; box.append(tip);
+    rows.forEach((r, i) => {
+      const cx = L + bw * i + bw / 2;
+      const rect = mk('rect', { x: cx - bar / 2, y: y(r.planned), width: bar, height: Math.max(0, y(0) - y(r.planned)), rx: 6, fill: r.planned >= 8 ? '#2F6FE4' : '#E5484D' });
+      if (r.planned) mk('text', { x: cx, y: y(r.planned) - 6, 'text-anchor': 'middle', fill: '#3a3128', 'font-size': 16 }, r.planned);
+      mk('text', { x: cx, y: H - 8, 'text-anchor': 'middle', fill: '#8a7f72', 'font-size': 15 }, r.label);
+      const show = (e) => {
+        tip.textContent = `${r.label} · 일정 ${r.planned}개 · 완료 ${r.done}개`; tip.hidden = false;
+        const bx = box.getBoundingClientRect(); const px = (e.touches ? e.touches[0].clientX : e.clientX) - bx.left;
+        tip.style.left = Math.max(0, Math.min(px + 10, box.clientWidth - tip.offsetWidth - 4)) + 'px'; tip.style.top = '0px';
+      };
+      rect.addEventListener('mousemove', show); rect.addEventListener('touchstart', show, { passive: true });
+      rect.addEventListener('mouseleave', () => { tip.hidden = true; });
+    });
+    mk('line', { x1: L, x2: W - R, y1: y(8), y2: y(8), stroke: '#7F7F7F', 'stroke-dasharray': '5 5' });
+  }
+})();
+</script>
+</body>
+</html>
