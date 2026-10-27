@@ -366,7 +366,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         list.forEach((n, i) => {
           const line = el('div');
           const pr = p.find((r) => r.event === n || r.event.startsWith(n.split(' - ')[0]));
-          const k = pr ? (pr.items ? ['sup', '준비물'] : ['ev', '행사']) : null;
+          const k = pr && !pr.items ? ['ev', '행사'] : null;
           if (k) line.append(el('span', 'tag k ' + k[0], k[1]));
           line.append(document.createTextNode(n)); td.append(line);
         });
