@@ -102,6 +102,11 @@ tr.past td { color: #b9ae9f; }
 .mascot { width: 72px; margin: 4px auto 0; }
 .st { display: inline-block; min-width: 3.6em; text-align: center; font-size: var(--fs-cap); line-height: 1.5; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--sand); white-space: nowrap; }
 td.stc, th.stc { text-align: center; width: 5em; }
+th.pc, td.pc { text-align: center; width: 6.2em; white-space: nowrap; }
+.poop { display: inline-block; min-width: 5.2em; font-size: var(--fs-cap); border-radius: 999px; padding: 1px 8px; }
+.poop.yes { background: #FFE3B3; color: #8a4b00; }
+.poop.no { background: #F3EEE4; color: var(--muted); }
+.poop.na { color: #c9bfae; }
 .st.done { color: var(--muted); background: #F6EFDF; }
 .st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
 .sub { background: #FFFEFA; border: 1px solid #EFE5CF; border-radius: 18px; padding: 14px; min-width: 0; }
@@ -170,7 +175,8 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     <section class="card">
       <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번 주 활동</h2></div>
       <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
-      <table><thead><tr><th>날짜</th><th>활동</th></tr></thead><tbody id="act-list"></tbody></table>
+      <table><thead><tr><th>날짜</th><th>활동</th><th class="pc">응가</th></tr></thead><tbody id="act-list"></tbody></table>
+      <p class="hint" id="poop-sum"></p>
     </section>
 
     <section class="card">
@@ -355,6 +361,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     if (wd === 0 || wd === 6) $('act-title').textContent = '다음 주 활동';
     $('act-note').textContent = `월간계획표 기준 · ${md(week[0])} ~ ${md(week[4])}`;
     const planBy = {}; (DATA.plan || []).forEach((r) => { (planBy[r.date] = planBy[r.date] || []).push(r); });
+    const poopBy = {}; (DATA.poop || []).forEach((r) => { poopBy[r.date] = r.done; });
     const actBy = {}; (DATA.activities || []).forEach((r) => { (actBy[r.date] = actBy[r.date] || []).push(r.name); });
     week.forEach((d) => {
       const tr = el('tr', d < today ? 'past' : ''); const td = el('td');
@@ -373,8 +380,13 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
           td.append(line);
         });
       }
-      tr.append(dateCell(d), td); al.append(tr);
+      const pc = el('td', 'pc'); const pv = poopBy[d];
+      pc.append(pv === true ? el('span', 'poop yes', '💩 했어요') : pv === false ? el('span', 'poop no', '안 했어요') : el('span', 'poop na', '-'));
+      tr.append(dateCell(d), td, pc); al.append(tr);
     });
+
+    const pm = (DATA.poop || []).filter((r) => r.date.slice(0, 7) === ym);
+    $('poop-sum').textContent = pm.length ? `💩 이번 달 원에서 응가 ${pm.filter((r) => r.done).length}번 / 알림장 ${pm.length}일 · 키즈노트 알림장 기준` : '';
 
     // 식단
     const SLOT = { '오전간식': ['s1', '🍓'], '점심': ['s2', '🍚'], '오후간식': ['s3', '🧁'], '저녁': ['s4', '🌙'] };
