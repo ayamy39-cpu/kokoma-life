@@ -142,7 +142,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   <div class="row">
     <section class="card">
       <div class="card-h"><img class="ch" src="img/walk.webp" alt=""><h2>챙길 준비물</h2></div>
-      <p class="note">월간계획표 + 직접 추가한 준비물 · 매달 1일 칫솔 2개 자동</p>
+      <p class="note">월간계획표 + 직접 추가 · 매달 1일 칫솔 2개, 매주 월요일 낮잠이불 자동 (주말·공휴일이면 다음 등원일)</p>
       <div class="pair">
         <div class="box" id="sup-today"><div class="lbl">오늘</div><div class="items"></div></div>
         <div class="box" id="sup-tmr"><div class="lbl">내일</div><div class="items"></div></div>
@@ -283,7 +283,13 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     const out = [];
     for (let i = 0; i <= 1; i++) {
       const first = iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)));
-      out.push({ date: nextSchoolDay(first), items: '칫솔 2개', src: 'auto' });
+      out.push({ date: nextSchoolDay(first), items: '칫솔 2개', src: 'auto', badge: '매달' });
+    }
+    // 매주 월요일 낮잠이불 (월요일이 공휴일이면 다음 평일), 이번 주부터 5주치
+    const t0 = new Date(today + 'T00:00:00Z');
+    const monday = new Date(t0.getTime() - ((t0.getUTCDay() + 6) % 7) * 864e5);
+    for (let w = 0; w < 5; w++) {
+      out.push({ date: nextSchoolDay(iso(new Date(monday.getTime() + w * 7 * 864e5))), items: '낮잠이불', src: 'auto', badge: '매주' });
     }
     return out;
   };
@@ -311,7 +317,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     up.forEach((r) => {
       const tr = el('tr'); const td = el('td', 'has', r.items);
       if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
-      if (r.src === 'auto') td.append(el('span', 'tag auto', '매달'));
+      if (r.src === 'auto') td.append(el('span', 'tag auto', r.badge || '자동'));
       tr.append(dateCell(r.date), td); sl.append(tr);
     });
 
