@@ -66,7 +66,7 @@ td.has { color: var(--accent); }
 tr.past td { color: #b9ae9f; }
 .tag { display: inline-block; font-size: 13px; border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; background: #FBD3DA; color: #a03a4c; }
 .tag.auto { background: #DDEBFF; color: #2a5bb8; }
-.tag.k { background: #EFE3C8; color: #6b5a3a; margin-left: 0; margin-right: 6px; }
+.tag.k { background: #EFE3C8; color: #6b5a3a; margin-left: 6px; margin-right: 0; }
 .tag.k.off { background: #FDE0E1; color: #b23a3e; }
 .tag.k.ev { background: #FFEFA8; color: #6b5300; }
 .tag.k.sup { background: #FFD5BD; color: #a3410a; }
@@ -100,7 +100,8 @@ tr.past td { color: #b9ae9f; }
 .badge { display: inline-block; margin-top: 4px; font-size: var(--fs-cap); padding: 2px 10px; border-radius: 999px; color: #fff; }
 .badge.blue { background: var(--blue); } .badge.red { background: var(--red); }
 .mascot { width: 72px; margin: 4px auto 0; }
-.st { font-size: var(--fs-cap); padding: 1px 8px; border-radius: 999px; border: 1px solid var(--sand); white-space: nowrap; }
+.st { display: inline-block; min-width: 3.6em; text-align: center; font-size: var(--fs-cap); line-height: 1.5; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--sand); white-space: nowrap; }
+td.stc, th.stc { text-align: center; width: 5em; }
 .st.done { color: var(--muted); background: #F6EFDF; }
 .st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
 .sub { background: #FFFEFA; border: 1px solid #EFE5CF; border-radius: 18px; padding: 14px; min-width: 0; }
@@ -196,13 +197,13 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     <div class="row">
       <div class="sub">
         <h3>월별 늦은 하원 수</h3>
-        <p class="note">최근 6개월 + 다음 달 · 점선은 기준 8개</p>
+        <p class="note">최근 3개월 + 다음 달 · 점선은 기준 8개</p>
         <div class="chart" id="chart"></div>
       </div>
       <div class="sub">
         <h3>이번 달 늦은 하원 목록</h3>
         <p class="note">완료 = 지금 시각 이전에 지난 일정</p>
-        <table><thead><tr><th>일시</th><th>담당</th><th>상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
+        <table><thead><tr><th>일시</th><th>담당</th><th class="stc">상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
       </div>
     </div>
   </section>
@@ -359,7 +360,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       const tr = el('tr', d < today ? 'past' : ''); const td = el('td');
       const p = planBy[d] || []; const names = actBy[d] || [];
       const off = p.find((r) => r.kind === '휴원') || (HOLIDAYS.has(d) ? { event: '공휴일' } : null);
-      if (off) { td.append(el('span', 'tag k off', '휴원'), document.createTextNode(off.event)); }
+      if (off) { td.append(document.createTextNode(off.event), el('span', 'tag k off', '휴원')); }
       else if (!names.length && !p.length) { td.append(el('span', null, '-')); }
       else {
         const list = names.length ? names : p.map((r) => r.event);
@@ -367,8 +368,9 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
           const line = el('div');
           const pr = p.find((r) => r.event === n || r.event.startsWith(n.split(' - ')[0]));
           const k = pr && !pr.items ? ['ev', '행사'] : null;
+          line.append(document.createTextNode(n));
           if (k) line.append(el('span', 'tag k ' + k[0], k[1]));
-          line.append(document.createTextNode(n)); td.append(line);
+          td.append(line);
         });
       }
       tr.append(dateCell(d), td); al.append(tr);
@@ -387,7 +389,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     // 늦은 하원
     const ev = (DATA.hawon || []).filter((r) => (r.title || '').trim().startsWith('(하원)'));
     const months = [];
-    for (let i = -5; i <= 1; i++) months.push(iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1))).slice(0, 7));
+    for (let i = -2; i <= 1; i++) months.push(iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1))).slice(0, 7));
     const byMonth = months.map((m) => {
       const inM = ev.filter((r) => r.start.slice(0, 7) === m);
       const done = inM.filter((r) => new Date(r.start) < now).length;
@@ -409,7 +411,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       const d = r.start.slice(0, 10);
       const state = new Date(r.start) < now ? '완료' : d === today ? '오늘' : '예정';
       const who = r.title.replace(/^\(하원\)\s*/, '').replace(/\/\s*\d+시\s*\d*분?\s*$/, '');
-      const tr = el('tr'); const st = el('td'); st.append(el('span', 'st ' + (state === '완료' ? 'done' : state === '오늘' ? 'today' : ''), state));
+      const tr = el('tr'); const st = el('td', 'stc'); st.append(el('span', 'st ' + (state === '완료' ? 'done' : state === '오늘' ? 'today' : ''), state));
       tr.append(el('td', 'date', md(d) + (r.start.length > 10 ? ' ' + r.start.slice(11, 16) : '')), el('td', null, who), st);
       hl.append(tr);
     });
