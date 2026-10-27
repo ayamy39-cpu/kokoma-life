@@ -265,12 +265,25 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     .then((d) => { DATA = d; render(); })
     .catch(() => { $('takeaway').textContent = '데이터를 불러오지 못했어요. 잠시 후 새로고침해 주세요.'; renderSupplies(); });
 
-  // 매달 1일 칫솔 2개: 이번 달·다음 달 1일
+  // 대한민국 공휴일(대체공휴일 포함) 2026~2027
+  const HOLIDAYS = new Set([
+    '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-02', '2026-05-05', '2026-05-25',
+    '2026-06-03', '2026-08-17', '2026-09-24', '2026-09-25', '2026-09-26', '2026-10-05', '2026-10-09', '2026-12-25',
+    '2027-01-01', '2027-02-06', '2027-02-07', '2027-02-08', '2027-02-09', '2027-03-01', '2027-05-05', '2027-05-13',
+    '2027-08-16', '2027-09-14', '2027-09-15', '2027-09-16', '2027-10-04', '2027-10-11', '2027-12-27',
+  ]);
+  // 주말·공휴일이면 다음 등원일(가장 빠른 평일)로 미룸
+  const nextSchoolDay = (d) => {
+    let t = new Date(d + 'T00:00:00Z');
+    while ([0, 6].includes(t.getUTCDay()) || HOLIDAYS.has(iso(t))) t = new Date(t.getTime() + 864e5);
+    return iso(t);
+  };
+  // 매달 1일 칫솔 2개 (1일이 주말·공휴일이면 다음 등원일)
   const toothbrush = () => {
     const out = [];
     for (let i = 0; i <= 1; i++) {
-      const d = iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)));
-      out.push({ date: d, items: '칫솔 2개', src: 'auto' });
+      const first = iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)));
+      out.push({ date: nextSchoolDay(first), items: '칫솔 2개', src: 'auto' });
     }
     return out;
   };
