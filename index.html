@@ -66,6 +66,7 @@ td.has { color: var(--accent); }
 tr.past td { color: #b9ae9f; }
 .tag { display: inline-block; font-size: 13px; border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; background: #FBD3DA; color: #a03a4c; }
 .tag.auto { background: #DDEBFF; color: #2a5bb8; }
+.tag.kn { background: #DDF3E4; color: #2d7a4a; }
 .tag.k { background: #EFE3C8; color: #6b5a3a; margin-left: 6px; margin-right: 0; }
 .tag.k.off { background: #FDE0E1; color: #b23a3e; }
 .tag.k.ev { background: #FFEFA8; color: #6b5300; }
@@ -304,7 +305,8 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   function allSupplies() {
     const plan = ((DATA && DATA.plan) || []).filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'plan' }));
     const ex = extra.map((r) => ({ date: r.date, items: r.items, src: 'extra', id: r.id }));
-    return [...plan, ...toothbrush(), ...ex].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
+    const rq = ((DATA && DATA.requests) || []).map((r) => ({ date: r.date, items: r.items, src: 'kn' }));
+    return [...plan, ...rq, ...toothbrush(), ...ex].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
   }
 
   function renderSupplies() {
@@ -333,6 +335,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         if (i) td.append(document.createTextNode(', '));
         td.append(document.createTextNode(r.items));
         if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
+        if (r.src === 'kn') td.append(el('span', 'tag kn', '알림장'));
         if (r.src === 'auto') td.append(el('span', 'tag auto', r.badge || '자동'));
       });
       tr.append(dateCell(g.date), td); sl.append(tr);
@@ -386,7 +389,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     });
 
     const pm = (DATA.poop || []).filter((r) => r.date.slice(0, 7) === ym);
-    $('poop-sum').textContent = pm.length ? `💩 이번 달 원에서 응가 ${pm.filter((r) => r.done).length}번 / 알림장 ${pm.length}일 · 키즈노트 알림장 기준` : '';
+    $('poop-sum').textContent = pm.length ? `💩 이번 달 원에서 응가 ${pm.filter((r) => r.done).length}번 / 알림장 ${pm.length}일 · 키즈노트 알림장·댓글 기준` : '';
 
     // 식단
     const SLOT = { '오전간식': ['s1', '🍓'], '점심': ['s2', '🍚'], '오후간식': ['s3', '🧁'], '저녁': ['s4', '🌙'] };
