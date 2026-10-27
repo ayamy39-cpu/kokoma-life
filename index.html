@@ -142,7 +142,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   <div class="row">
     <section class="card">
       <div class="card-h"><img class="ch" src="img/walk.webp" alt=""><h2>챙길 준비물</h2></div>
-      <p class="note">월간계획표 + 직접 추가 · 매달 1일 칫솔 2개, 매주 월요일 낮잠이불 자동 (주말·공휴일이면 다음 등원일)</p>
+      <p class="note">이번 주 월 ~ 다음 주 수 · 칫솔(매달 1일)·낮잠이불(매주 월) 자동</p>
       <div class="pair">
         <div class="box" id="sup-today"><div class="lbl">오늘</div><div class="items"></div></div>
         <div class="box" id="sup-tmr"><div class="lbl">내일</div><div class="items"></div></div>
@@ -312,13 +312,23 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     fill('sup-today', today); fill('sup-tmr', tomorrow);
 
     const sl = $('sup-list'); sl.replaceChildren();
-    const up = all.filter((r) => r.date >= today);
-    if (!up.length) emptyRow(sl, 2, '남은 준비물이 없어요');
-    up.forEach((r) => {
-      const tr = el('tr'); const td = el('td', 'has', r.items);
-      if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
-      if (r.src === 'auto') td.append(el('span', 'tag auto', r.badge || '자동'));
-      tr.append(dateCell(r.date), td); sl.append(tr);
+    // 이번 주 월요일 ~ 다음 주 수요일
+    const t0 = new Date(today + 'T00:00:00Z');
+    const mon = new Date(t0.getTime() - ((t0.getUTCDay() + 6) % 7) * 864e5);
+    const from = iso(mon), to = iso(new Date(mon.getTime() + 9 * 864e5));
+    const up = all.filter((r) => r.date >= from && r.date <= to);
+    const byDate = [];
+    up.forEach((r) => { const last = byDate[byDate.length - 1]; if (last && last.date === r.date) last.list.push(r); else byDate.push({ date: r.date, list: [r] }); });
+    if (!byDate.length) emptyRow(sl, 2, '이번 기간에 챙길 준비물이 없어요');
+    byDate.forEach((g) => {
+      const tr = el('tr', g.date < today ? 'past' : ''); const td = el('td', 'has');
+      g.list.forEach((r, i) => {
+        if (i) td.append(document.createTextNode(', '));
+        td.append(document.createTextNode(r.items));
+        if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
+        if (r.src === 'auto') td.append(el('span', 'tag auto', r.badge || '자동'));
+      });
+      tr.append(dateCell(g.date), td); sl.append(tr);
     });
 
     const xl = $('extra-list'); xl.replaceChildren();
