@@ -23,6 +23,7 @@ body {
   font-size: var(--fs-body); color: var(--fg); background: var(--paper);
   background-image: radial-gradient(rgba(222,204,166,.55) 1.2px, transparent 1.4px); background-size: 18px 18px;
 }
+button, input { font: inherit; color: inherit; }
 .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 img.ch { display: block; pointer-events: none; user-select: none; height: auto; }
 
@@ -39,11 +40,12 @@ img.ch { display: block; pointer-events: none; user-select: none; height: auto; 
   @keyframes bob { from { transform: rotate(-3deg); } to { transform: rotate(3deg) translateY(-4px); } }
 }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 14px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .card { background: var(--card); border: 2px dashed var(--sand); border-radius: 22px; padding: 18px; min-width: 0; }
 .card-h { display: flex; align-items: flex-end; gap: 8px; }
-.card-h img.ch { width: 64px; flex: none; margin-top: -26px; }
+.card-h img.ch { width: 60px; flex: none; margin-top: -24px; }
 .card h2 { font-size: var(--fs-head); font-weight: 400; margin: 0; }
+.card h3 { font-size: var(--fs-body); font-weight: 400; margin: 0 0 4px; }
 .note { font-size: var(--fs-cap); color: var(--muted); margin: 2px 0 12px; }
 
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -52,40 +54,66 @@ img.ch { display: block; pointer-events: none; user-select: none; height: auto; 
 .box.on { border-color: var(--accent); background: #FFEDE2; }
 .box.on .lbl::after { content: " ✨ 꼭 챙기기!"; color: var(--accent); }
 .items { margin-top: 4px; min-height: 1.4em; }
-.items small { display: block; color: var(--muted); font-size: var(--fs-cap); }
+.items div + div { margin-top: 2px; }
 
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px dotted var(--sand); vertical-align: top; }
 tr:last-child td { border-bottom: 0; }
 th { font-size: var(--fs-cap); color: var(--muted); font-weight: 400; }
-.sup td:first-child { white-space: nowrap; }
+td.date { white-space: nowrap; width: 8.5em; }
 .dd { display: inline-block; font-size: var(--fs-cap); color: var(--muted); margin-left: 4px; }
 td.has { color: var(--accent); }
+tr.past td { color: #b9ae9f; }
+.tag { display: inline-block; font-size: 13px; border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; background: #FBD3DA; color: #a03a4c; }
+.tag.auto { background: #DDEBFF; color: #2a5bb8; }
+.tag.k { background: #EFE3C8; color: #6b5a3a; margin-left: 0; margin-right: 6px; }
+.tag.k.off { background: #FDE0E1; color: #b23a3e; }
+.tag.k.ev { background: #FFEFA8; color: #6b5300; }
+.tag.k.sup { background: #FFD5BD; color: #a3410a; }
 .meal td:first-child { white-space: nowrap; width: 7em; }
 .slot { display: inline-block; font-size: var(--fs-cap); border-radius: 999px; padding: 1px 10px; }
 .s1 { background: #FFEFA8; } .s2 { background: #FFD5BD; } .s3 { background: #FBD3DA; } .s4 { background: #EFE3C8; }
 .empty { text-align: center !important; color: var(--muted); padding: 14px !important; }
-.empty img.ch { width: 72px; margin: 0 auto 4px; }
+.empty img.ch { width: 64px; margin: 0 auto 4px; }
+.scroll { overflow: visible; }
 
-.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+/* add form */
+.add { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; margin-bottom: 12px;
+  background: #FBF5E7; border: 2px solid var(--sand); border-radius: 18px; padding: 10px; }
+.add input { border: 2px solid var(--sand); border-radius: 12px; padding: 8px 10px; background: #fff; min-width: 0; }
+.add input:focus { outline: none; border-color: var(--accent); }
+.add input[type=date] { width: 10.5em; }
+.btn { border: 0; border-radius: 12px; padding: 9px 16px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; }
+.btn:active { transform: translateY(1px); }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; }
+.chip { border: 1px solid var(--sand); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: var(--fs-cap); cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; }
+.del:hover { color: var(--red); }
+.hint { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
 .tile { background: #FBF5E7; border-radius: 18px; padding: 12px; text-align: center; min-width: 0; }
 .tile .lbl { font-size: var(--fs-cap); color: var(--muted); }
 .num { font-size: 40px; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .num.blue { color: var(--blue); } .num.red { color: var(--red); }
 .badge { display: inline-block; margin-top: 4px; font-size: var(--fs-cap); padding: 2px 10px; border-radius: 999px; color: #fff; }
 .badge.blue { background: var(--blue); } .badge.red { background: var(--red); }
-.mascot { width: 76px; margin: 4px auto 0; }
+.mascot { width: 72px; margin: 4px auto 0; }
 .st { font-size: var(--fs-cap); padding: 1px 8px; border-radius: 999px; border: 1px solid var(--sand); white-space: nowrap; }
 .st.done { color: var(--muted); background: #F6EFDF; }
 .st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
+.sub { background: #FFFEFA; border: 1px solid #EFE5CF; border-radius: 18px; padding: 14px; min-width: 0; }
 
 .chart { position: relative; }
 .chart svg { display: block; width: 100%; height: auto; }
 .chart text { font-family: inherit; }
 .tip { position: absolute; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 4px 10px; font-size: var(--fs-cap); pointer-events: none; white-space: nowrap; }
 footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padding: 4px 0 20px; }
-.err { color: var(--red); text-align: center; padding: 40px 0; }
 
+@media (max-width: 760px) {
+  .row { grid-template-columns: 1fr; }
+}
 @media (max-width: 560px) {
   .wrap { padding: 10px; gap: 12px; }
   .hero { padding: 8px 14px; }
@@ -93,18 +121,15 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   .hero h1 { font-size: 26px; }
   .tiles { grid-template-columns: 1fr 1fr; }
   .tile:first-child { grid-column: 1 / -1; }
-  .sup thead { display: none; }
-  .sup tr { display: block; padding: 8px 4px; border-bottom: 1px dotted var(--sand); }
-  .sup tr:last-child { border-bottom: 0; }
-  .sup td { display: inline; border: 0; padding: 0 4px 0 0; }
-  .sup td.has, .sup td:last-child { display: block; padding-top: 2px; }
+  .add { grid-template-columns: 1fr auto; }
+  .add input[type=date] { grid-column: 1 / -1; width: 100%; }
   .box.on .lbl::after { content: " ✨"; }
-  .hl td { font-size: var(--fs-cap); }
+  td.date { width: auto; }
 }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
+<div class="wrap">
   <header class="hero">
     <div class="hero-text">
       <h1>꼬꼬마 생활<span class="dot">.</span><span class="today" id="date"></span></h1>
@@ -113,15 +138,38 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     <img class="ch" src="img/dance.webp" alt="">
   </header>
 
-  <div class="grid">
+  <!-- 1행: 준비물 / 추가 준비물 -->
+  <div class="row">
     <section class="card">
       <div class="card-h"><img class="ch" src="img/walk.webp" alt=""><h2>챙길 준비물</h2></div>
-      <p class="note">가정통신문(월간계획표) 기준 · 오늘 이후 일정</p>
+      <p class="note">월간계획표 + 직접 추가한 준비물 · 매달 1일 칫솔 2개 자동</p>
       <div class="pair">
         <div class="box" id="sup-today"><div class="lbl">오늘</div><div class="items"></div></div>
         <div class="box" id="sup-tmr"><div class="lbl">내일</div><div class="items"></div></div>
       </div>
-      <table class="sup"><thead><tr><th>날짜</th><th>활동</th><th>준비물</th></tr></thead><tbody id="sup-list"></tbody></table>
+      <table><thead><tr><th>날짜</th><th>준비물</th></tr></thead><tbody id="sup-list"></tbody></table>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><img class="ch" src="img/teddy.webp" alt=""><h2>추가 준비물</h2></div>
+      <p class="note">계획표에 없는 준비물을 직접 적어 두세요 · 날짜는 내일로 자동 입력</p>
+      <div class="add">
+        <input type="date" id="add-date" aria-label="날짜">
+        <input type="text" id="add-text" placeholder="예) 여벌옷, 기저귀 10개" aria-label="준비물" maxlength="60">
+        <button class="btn" id="add-btn" type="button">추가</button>
+      </div>
+      <div class="quick" id="quick"></div>
+      <table><thead><tr><th>날짜</th><th>준비물</th><th></th></tr></thead><tbody id="extra-list"></tbody></table>
+      <p class="hint">※ 직접 추가한 준비물은 이 휴대폰(브라우저)에만 저장돼요.</p>
+    </section>
+  </div>
+
+  <!-- 2행: 활동 / 식사 -->
+  <div class="row">
+    <section class="card">
+      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2>이번 달 활동</h2></div>
+      <p class="note">월간계획표의 특별활동·행사·휴원</p>
+      <div class="scroll"><table><thead><tr><th>날짜</th><th>활동</th></tr></thead><tbody id="act-list"></tbody></table></div>
     </section>
 
     <section class="card">
@@ -131,12 +179,13 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     </section>
   </div>
 
+  <!-- 3행: 늦은 하원 -->
   <section class="card">
-    <div class="card-h"><img class="ch" src="img/teddy.webp" alt=""><h2>이번 달 (하원) 일정</h2></div>
+    <div class="card-h"><img class="ch" src="img/cheeks.webp" alt=""><h2>늦은 하원 일정 (19:40 이후)</h2></div>
     <p class="note">구글 캘린더 공유일정 중 (하원)으로 시작하는 일정 · 매일 아침 갱신 · 8개 이상 파란색, 미만 빨간색</p>
     <div class="tiles">
       <div class="tile">
-        <div class="lbl">이번 달 (하원) 일정</div>
+        <div class="lbl">이번 달 늦은 하원</div>
         <div class="num" id="planned">—</div>
         <span class="badge" id="badge" hidden></span>
         <img class="ch mascot" id="mascot" alt="" hidden>
@@ -144,20 +193,19 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       <div class="tile"><div class="lbl">오늘까지 실제 하원</div><div class="num" id="done">—</div></div>
       <div class="tile"><div class="lbl">남은 하원</div><div class="num" id="left">—</div></div>
     </div>
+    <div class="row">
+      <div class="sub">
+        <h3>월별 늦은 하원 수</h3>
+        <p class="note">최근 6개월 + 다음 달 · 점선은 기준 8개</p>
+        <div class="chart" id="chart"></div>
+      </div>
+      <div class="sub">
+        <h3>이번 달 늦은 하원 목록</h3>
+        <p class="note">완료 = 지금 시각 이전에 지난 일정</p>
+        <table><thead><tr><th>일시</th><th>담당</th><th>상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
+      </div>
+    </div>
   </section>
-
-  <div class="grid">
-    <section class="card">
-      <h2>월별 (하원) 일정 수</h2>
-      <p class="note">최근 6개월 + 다음 달 · 점선은 기준 8개</p>
-      <div class="chart" id="chart"></div>
-    </section>
-    <section class="card">
-      <h2>이번 달 (하원) 일정 목록</h2>
-      <p class="note">완료 = 지금 시각 이전에 지난 일정</p>
-      <table class="hl"><thead><tr><th>일시</th><th>일정</th><th>상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
-    </section>
-  </div>
 
   <footer id="updated"></footer>
 </div>
@@ -168,11 +216,19 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   const SEOUL = 9 * 3600e3;
   const now = new Date();
   const seoul = new Date(now.getTime() + SEOUL);
-  const today = seoul.toISOString().slice(0, 10);
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const today = iso(seoul);
+  const tomorrow = iso(new Date(seoul.getTime() + 864e5));
   const ym = today.slice(0, 7);
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const dday = (d) => Math.round((new Date(d + 'T00:00:00Z') - new Date(today + 'T00:00:00Z')) / 864e5);
   const md = (d) => { const t = new Date(d + 'T00:00:00Z'); return (t.getUTCMonth() + 1) + '/' + t.getUTCDate() + ' (' + DOW[t.getUTCDay()] + ')'; };
+  const dateCell = (d) => {
+    const td = el('td', 'date', md(d)); const n = dday(d);
+    if (n >= 0) td.append(el('span', 'dd', n === 0 ? '오늘' : n === 1 ? '내일' : 'D-' + n));
+    return td;
+  };
   const emptyRow = (tb, n, text) => {
     const tr = el('tr'); const td = el('td', 'empty'); td.colSpan = n;
     const im = el('img', 'ch'); im.src = 'img/question.webp'; im.alt = '';
@@ -180,44 +236,111 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   };
   $('date').textContent = (seoul.getUTCMonth() + 1) + '월 ' + seoul.getUTCDate() + '일 (' + DOW[seoul.getUTCDay()] + ') 🐥';
 
+  /* ---------- 직접 추가 준비물 (이 브라우저에 저장) ---------- */
+  const KEY = 'kkoma-extra-v1';
+  const loadExtra = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+  const saveExtra = (list) => { try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; } };
+  let extra = loadExtra();
+  let DATA = null;
+
+  const addDate = $('add-date'), addText = $('add-text');
+  addDate.value = tomorrow; addDate.min = today;
+  const doAdd = (text) => {
+    const t = (text ?? addText.value).trim(); const d = addDate.value;
+    if (!t || !/^\d{4}-\d{2}-\d{2}$/.test(d)) { addText.focus(); return; }
+    extra.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: d, items: t });
+    if (!saveExtra(extra)) alert('이 브라우저에서는 저장할 수 없어요 (개인정보 보호 모드인지 확인해 주세요).');
+    addText.value = ''; addDate.value = tomorrow;
+    renderSupplies();
+  };
+  $('add-btn').addEventListener('click', () => doAdd());
+  addText.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) doAdd(); });
+  ['여벌옷', '기저귀', '물티슈', '낮잠이불', '약 / 투약의뢰서'].forEach((q) => {
+    const c = el('button', 'chip', '+ ' + q); c.type = 'button'; c.addEventListener('click', () => doAdd(q)); $('quick').append(c);
+  });
+
+  /* ---------- 데이터 ---------- */
   fetch('data.json?v=' + Date.now(), { cache: 'no-store' })
     .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(render)
-    .catch(() => { $('takeaway').textContent = '데이터를 불러오지 못했어요. 잠시 후 새로고침해 주세요.'; });
+    .then((d) => { DATA = d; render(); })
+    .catch(() => { $('takeaway').textContent = '데이터를 불러오지 못했어요. 잠시 후 새로고침해 주세요.'; renderSupplies(); });
 
-  function render(data) {
-    // 준비물
-    const sup = (data.plan || []).filter((r) => r.date >= today).sort((a, b) => a.date.localeCompare(b.date))
-      .map((r) => ({ ...r, dday: Math.round((new Date(r.date + 'T00:00:00Z') - new Date(today + 'T00:00:00Z')) / 864e5) }));
-    const fill = (id, rows) => {
+  // 매달 1일 칫솔 2개: 이번 달·다음 달 1일
+  const toothbrush = () => {
+    const out = [];
+    for (let i = 0; i <= 1; i++) {
+      const d = iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)));
+      out.push({ date: d, items: '칫솔 2개', src: 'auto' });
+    }
+    return out;
+  };
+
+  function allSupplies() {
+    const plan = ((DATA && DATA.plan) || []).filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'plan' }));
+    const ex = extra.map((r) => ({ date: r.date, items: r.items, src: 'extra', id: r.id }));
+    return [...plan, ...toothbrush(), ...ex].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
+  }
+
+  function renderSupplies() {
+    const all = allSupplies();
+    const fill = (id, d) => {
       const box = $(id), it = box.querySelector('.items'); it.replaceChildren();
-      box.classList.toggle('on', rows.some((r) => r.items));
+      const rows = all.filter((r) => r.date === d);
+      box.classList.toggle('on', rows.length > 0);
       if (!rows.length) { it.textContent = '없음'; return; }
-      rows.forEach((r) => { const d = el('div', null, r.items || (r.kind === '휴원' ? '휴원' : '준비물 없음')); d.append(el('small', null, r.event)); it.append(d); });
+      rows.forEach((r) => it.append(el('div', null, r.items)));
     };
-    fill('sup-today', sup.filter((r) => r.dday === 0));
-    fill('sup-tmr', sup.filter((r) => r.dday === 1));
-    const sl = $('sup-list');
-    if (!sup.length) emptyRow(sl, 3, '이번 달 남은 일정이 없어요');
-    sup.forEach((r) => {
-      const tr = el('tr'); const w = el('td', null, md(r.date)); w.append(el('span', 'dd', r.dday === 0 ? '오늘' : 'D-' + r.dday));
-      tr.append(w, el('td', null, r.event), el('td', r.items ? 'has' : '', r.items || '-')); sl.append(tr);
+    fill('sup-today', today); fill('sup-tmr', tomorrow);
+
+    const sl = $('sup-list'); sl.replaceChildren();
+    const up = all.filter((r) => r.date >= today);
+    if (!up.length) emptyRow(sl, 2, '남은 준비물이 없어요');
+    up.forEach((r) => {
+      const tr = el('tr'); const td = el('td', 'has', r.items);
+      if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
+      if (r.src === 'auto') td.append(el('span', 'tag auto', '매달'));
+      tr.append(dateCell(r.date), td); sl.append(tr);
+    });
+
+    const xl = $('extra-list'); xl.replaceChildren();
+    const mine = [...extra].sort((a, b) => a.date.localeCompare(b.date));
+    if (!mine.length) emptyRow(xl, 3, '아직 추가한 준비물이 없어요');
+    mine.forEach((r) => {
+      const tr = el('tr', r.date < today ? 'past' : ''); const del = el('button', 'del', '×'); del.type = 'button'; del.title = '삭제';
+      del.addEventListener('click', () => { extra = extra.filter((x) => x.id !== r.id); saveExtra(extra); renderSupplies(); });
+      const tdd = el('td'); tdd.append(del);
+      tr.append(dateCell(r.date), el('td', null, r.items), tdd); xl.append(tr);
+    });
+  }
+
+  function render() {
+    renderSupplies();
+
+    // 활동
+    const al = $('act-list'); al.replaceChildren();
+    const acts = (DATA.plan || []).filter((r) => r.date.slice(0, 7) === ym).sort((a, b) => a.date.localeCompare(b.date));
+    if (!acts.length) emptyRow(al, 2, '이번 달 활동 정보가 없어요');
+    acts.forEach((r) => {
+      const tr = el('tr', r.date < today ? 'past' : ''); const td = el('td');
+      const k = r.kind === '휴원' ? ['off', '휴원'] : r.items ? ['sup', '준비물'] : ['ev', '행사'];
+      td.append(el('span', 'tag k ' + k[0], k[1]), document.createTextNode(r.event));
+      tr.append(dateCell(r.date), td); al.append(tr);
     });
 
     // 식단
     const SLOT = { '오전간식': ['s1', '🍓'], '점심': ['s2', '🍚'], '오후간식': ['s3', '🧁'], '저녁': ['s4', '🌙'] };
-    const meals = (data.meals || []).filter((r) => r.date === today).sort((a, b) => a.order - b.order);
-    const mt = $('meals');
+    const meals = (DATA.meals || []).filter((r) => r.date === today).sort((a, b) => a.order - b.order);
+    const mt = $('meals'); mt.replaceChildren();
     if (!meals.length) emptyRow(mt, 2, '오늘은 식단 정보가 없어요');
     meals.forEach((r) => {
       const tr = el('tr'); const td = el('td'); const [c, ic] = SLOT[r.slot] || ['s4', '•'];
       td.append(el('span', 'slot ' + c, ic + ' ' + r.slot)); tr.append(td, el('td', null, r.menu)); mt.append(tr);
     });
 
-    // 하원
-    const ev = (data.hawon || []).filter((r) => (r.title || '').trim().startsWith('(하원)'));
+    // 늦은 하원
+    const ev = (DATA.hawon || []).filter((r) => (r.title || '').trim().startsWith('(하원)'));
     const months = [];
-    for (let i = -5; i <= 1; i++) months.push(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1)).toISOString().slice(0, 7));
+    for (let i = -5; i <= 1; i++) months.push(iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1))).slice(0, 7));
     const byMonth = months.map((m) => {
       const inM = ev.filter((r) => r.start.slice(0, 7) === m);
       const done = inM.filter((r) => new Date(r.start) < now).length;
@@ -230,24 +353,25 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     const b = $('badge'); b.hidden = false; b.className = 'badge ' + (ok ? 'blue' : 'red');
     b.textContent = ok ? '8개 이상 · 충분해요!' : `8개 미만 · ${8 - cur.planned}개 부족`;
     const ms = $('mascot'); ms.src = ok ? 'img/cheeks.webp' : 'img/question.webp'; ms.hidden = false;
-    $('takeaway').textContent = `이번 달 (하원) ${cur.planned}개 중 ${cur.done}개 완료, ${cur.upcoming}개 남음`;
+    $('takeaway').textContent = `이번 달 늦은 하원 ${cur.planned}개 중 ${cur.done}개 완료, ${cur.upcoming}개 남음`;
 
-    const hl = $('hawon-list');
+    const hl = $('hawon-list'); hl.replaceChildren();
     const list = ev.filter((r) => r.start.slice(0, 7) === ym).sort((a, b) => a.start.localeCompare(b.start));
-    if (!list.length) emptyRow(hl, 3, '이번 달 (하원) 일정이 없어요');
+    if (!list.length) emptyRow(hl, 3, '이번 달 늦은 하원 일정이 없어요');
     list.forEach((r) => {
       const d = r.start.slice(0, 10);
       const state = new Date(r.start) < now ? '완료' : d === today ? '오늘' : '예정';
+      const who = r.title.replace(/^\(하원\)\s*/, '').replace(/\/\s*\d+시\s*\d*분?\s*$/, '');
       const tr = el('tr'); const st = el('td'); st.append(el('span', 'st ' + (state === '완료' ? 'done' : state === '오늘' ? 'today' : ''), state));
-      tr.append(el('td', null, md(d) + (r.start.length > 10 ? ' ' + r.start.slice(11, 16) : '')), el('td', null, r.title.replace(/^\(하원\)\s*/, '')), st);
+      tr.append(el('td', 'date', md(d) + (r.start.length > 10 ? ' ' + r.start.slice(11, 16) : '')), el('td', null, who), st);
       hl.append(tr);
     });
 
     drawChart(byMonth);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawChart(byMonth), 150); });
 
-    if (data.updatedAt) {
-      const u = new Date(new Date(data.updatedAt).getTime() + SEOUL);
+    if (DATA.updatedAt) {
+      const u = new Date(new Date(DATA.updatedAt).getTime() + SEOUL);
       $('updated').textContent = `마지막 갱신 ${u.getUTCMonth() + 1}/${u.getUTCDate()} ${String(u.getUTCHours()).padStart(2, '0')}:${String(u.getUTCMinutes()).padStart(2, '0')} · 매일 아침 자동 갱신`;
     }
   }
@@ -255,7 +379,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   function drawChart(rows) {
     const box = $('chart'); box.replaceChildren();
     const NS = 'http://www.w3.org/2000/svg';
-    const W = Math.max(280, box.clientWidth || 320), H = 250, L = 34, R = 6, T = 22, B = 30;
+    const W = Math.max(260, box.clientWidth || 320), H = 230, L = 34, R = 6, T = 22, B = 30;
     const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); box.append(svg);
     const mk = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.append(e); return e; };
     const maxY = Math.max(10, Math.ceil((Math.max(...rows.map((r) => r.planned)) + 2) / 2) * 2);
