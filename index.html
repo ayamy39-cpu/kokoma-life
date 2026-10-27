@@ -167,9 +167,9 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   <!-- 2행: 활동 / 식사 -->
   <div class="row">
     <section class="card">
-      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2>이번 달 활동</h2></div>
-      <p class="note">월간계획표의 특별활동·행사·휴원</p>
-      <div class="scroll"><table><thead><tr><th>날짜</th><th>활동</th></tr></thead><tbody id="act-list"></tbody></table></div>
+      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번 주 활동</h2></div>
+      <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
+      <table><thead><tr><th>날짜</th><th>활동</th></tr></thead><tbody id="act-list"></tbody></table>
     </section>
 
     <section class="card">
@@ -337,13 +337,31 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
     // 활동
     const al = $('act-list'); al.replaceChildren();
-    const acts = (DATA.plan || []).filter((r) => r.date.slice(0, 7) === ym).sort((a, b) => a.date.localeCompare(b.date));
-    if (!acts.length) emptyRow(al, 2, '이번 달 활동 정보가 없어요');
-    acts.forEach((r) => {
-      const tr = el('tr', r.date < today ? 'past' : ''); const td = el('td');
-      const k = r.kind === '휴원' ? ['off', '휴원'] : r.items ? ['sup', '준비물'] : ['ev', '행사'];
-      td.append(el('span', 'tag k ' + k[0], k[1]), document.createTextNode(r.event));
-      tr.append(dateCell(r.date), td); al.append(tr);
+    // 이번 주 월~금 (토·일에는 다음 주)
+    const t0 = new Date(today + 'T00:00:00Z'); const wd = t0.getUTCDay();
+    const mon = new Date(t0.getTime() + (wd === 6 ? 2 : wd === 0 ? 1 : 1 - wd) * 864e5);
+    const week = [0, 1, 2, 3, 4].map((i) => iso(new Date(mon.getTime() + i * 864e5)));
+    if (wd === 0 || wd === 6) $('act-title').textContent = '다음 주 활동';
+    $('act-note').textContent = `월간계획표 기준 · ${md(week[0])} ~ ${md(week[4])}`;
+    const planBy = {}; (DATA.plan || []).forEach((r) => { (planBy[r.date] = planBy[r.date] || []).push(r); });
+    const actBy = {}; (DATA.activities || []).forEach((r) => { (actBy[r.date] = actBy[r.date] || []).push(r.name); });
+    week.forEach((d) => {
+      const tr = el('tr', d < today ? 'past' : ''); const td = el('td');
+      const p = planBy[d] || []; const names = actBy[d] || [];
+      const off = p.find((r) => r.kind === '휴원') || (HOLIDAYS.has(d) ? { event: '공휴일' } : null);
+      if (off) { td.append(el('span', 'tag k off', '휴원'), document.createTextNode(off.event)); }
+      else if (!names.length && !p.length) { td.append(el('span', null, '-')); }
+      else {
+        const list = names.length ? names : p.map((r) => r.event);
+        list.forEach((n, i) => {
+          const line = el('div');
+          const pr = p.find((r) => r.event === n || r.event.startsWith(n.split(' - ')[0]));
+          const k = pr ? (pr.items ? ['sup', '준비물'] : ['ev', '행사']) : null;
+          if (k) line.append(el('span', 'tag k ' + k[0], k[1]));
+          line.append(document.createTextNode(n)); td.append(line);
+        });
+      }
+      tr.append(dateCell(d), td); al.append(tr);
     });
 
     // 식단
