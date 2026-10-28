@@ -113,6 +113,9 @@ th.pc, td.pc { text-align: center; width: 5.6em; white-space: nowrap; padding-le
 .padd input { border: 2px solid var(--sand); border-radius: 12px; padding: 5px 8px; background: #fff; font-size: var(--fs-cap); }
 .padd input:focus { outline: none; border-color: var(--accent); }
 .btn.sm { padding: 6px 12px; font-size: var(--fs-cap); }
+.btn.wide { display: block; text-align: center; margin: 0 0 12px; text-decoration: none; }
+a.btn { text-decoration: none; }
+.btn.off { background: #ccc; pointer-events: none; }
 .tag.mine { background: #FFF3B0; color: #7a6200; margin-left: 4px; }
 td.pc .del { font-size: 15px; padding: 0 0 0 2px; }
 .poop.med { background: #E3ECFF; color: #2a5bb8; }
@@ -170,15 +173,11 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
     <section class="card">
       <div class="card-h"><img class="ch" src="img/teddy.webp" alt=""><h2>추가 준비물</h2></div>
-      <p class="note">계획표에 없는 준비물을 직접 적어 두세요 · 날짜는 내일로 자동 입력</p>
-      <div class="add">
-        <input type="date" id="add-date" aria-label="날짜">
-        <input type="text" id="add-text" placeholder="예) 여벌옷, 기저귀 10개" aria-label="준비물" maxlength="60">
-        <button class="btn" id="add-btn" type="button">추가</button>
-      </div>
-      <div class="quick" id="quick"></div>
-      <table><thead><tr><th>날짜</th><th>준비물</th><th></th></tr></thead><tbody id="extra-list"></tbody></table>
-      <p class="hint">※ 직접 추가한 준비물은 이 휴대폰(브라우저)에만 저장돼요.</p>
+      <p class="note">가족 누구나 Notion 양식으로 적으면 모두에게 보여요</p>
+      <a class="btn wide" id="form-btn" target="_blank" rel="noopener">📝 준비물·응가 기록하기 (Notion)</a>
+      <p class="hint" id="form-wait" hidden>기록 양식 링크를 연결하는 중이에요.</p>
+      <table><thead><tr><th>날짜</th><th>가족이 추가한 준비물</th></tr></thead><tbody id="extra-list"></tbody></table>
+      <p class="hint">※ Notion에 적은 기록은 몇 시간 안에(하루 4번 자동 갱신) 사이트에 반영돼요. 지우거나 고칠 땐 Notion에서 하면 돼요.</p>
     </section>
   </div>
 
@@ -187,14 +186,10 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     <section class="card">
       <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2></div>
       <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
-      <div class="padd">
-        <span class="padd-l">💩 응가 추가</span>
-        <input type="date" id="poop-date" aria-label="응가 날짜">
-        <button class="btn sm" id="poop-btn" type="button">추가</button>
-      </div>
+      <div class="padd"><a class="btn sm" id="poop-form" target="_blank" rel="noopener">💩 응가 기록하기</a></div>
       <table><thead><tr><th>날짜</th><th>활동</th><th class="pc">응가</th><th class="pc">투약</th></tr></thead><tbody id="act-list"></tbody></table>
       <p class="hint" id="poop-sum"></p>
-      <p class="hint">※ 직접 추가한 응가(<span class="tag mine" style="margin:0">직접</span>)는 이 휴대폰(브라우저)에만 저장돼요. 지우려면 ×를 누르세요.</p>
+      <p class="hint">※ 알림장에 없는 응가는 가족이 Notion에 기록하면 <span class="tag mine" style="margin:0">직접</span> 표시로 보여요.</p>
     </section>
 
     <section class="card">
@@ -261,40 +256,8 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   };
   $('date').textContent = (seoul.getUTCMonth() + 1) + '월 ' + seoul.getUTCDate() + '일 (' + DOW[seoul.getUTCDay()] + ') 🐥';
 
-  /* ---------- 직접 추가 준비물 (이 브라우저에 저장) ---------- */
-  const KEY = 'kkoma-extra-v1';
-  const loadExtra = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
-  const saveExtra = (list) => { try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; } };
-  let extra = loadExtra();
   let DATA = null;
-
-  const addDate = $('add-date'), addText = $('add-text');
-  addDate.value = tomorrow; addDate.min = today;
-  const doAdd = (text) => {
-    const t = (text ?? addText.value).trim(); const d = addDate.value;
-    if (!t || !/^\d{4}-\d{2}-\d{2}$/.test(d)) { addText.focus(); return; }
-    extra.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: d, items: t });
-    if (!saveExtra(extra)) alert('이 브라우저에서는 저장할 수 없어요 (개인정보 보호 모드인지 확인해 주세요).');
-    addText.value = ''; addDate.value = tomorrow;
-    renderSupplies();
-  };
-  $('add-btn').addEventListener('click', () => doAdd());
-  addText.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) doAdd(); });
-  ['여벌옷', '기저귀', '물티슈', '낮잠이불', '약 / 투약의뢰서'].forEach((q) => {
-    const c = el('button', 'chip', '+ ' + q); c.type = 'button'; c.addEventListener('click', () => doAdd(q)); $('quick').append(c);
-  });
-
-  /* ---------- 직접 추가 응가 (이 브라우저에 저장) ---------- */
-  const PKEY = 'kkoma-poop-v1';
-  let myPoop = (() => { try { const v = JSON.parse(localStorage.getItem(PKEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } })();
-  const savePoop = () => { try { localStorage.setItem(PKEY, JSON.stringify(myPoop)); } catch (e) {} };
-  const poopDate = $('poop-date'); poopDate.value = today; poopDate.max = today;
-  $('poop-btn').addEventListener('click', () => {
-    const d = poopDate.value;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
-    if (!myPoop.includes(d)) { myPoop.push(d); myPoop.sort(); savePoop(); }
-    poopDate.value = today; renderLife();
-  });
+  const manual = (k) => ((DATA && DATA.manual) || []).filter((r) => r.kind === k);
 
   /* ---------- 데이터 ---------- */
   fetch('data.json?v=' + Date.now(), { cache: 'no-store' })
@@ -333,7 +296,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
   function allSupplies() {
     const plan = ((DATA && DATA.plan) || []).filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'plan' }));
-    const ex = extra.map((r) => ({ date: r.date, items: r.items, src: 'extra', id: r.id }));
+    const ex = manual('준비물').filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'extra' }));
     const rq = ((DATA && DATA.requests) || []).map((r) => ({ date: r.date, items: r.items, src: 'kn' }));
     return [...plan, ...rq, ...toothbrush(), ...ex].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
   }
@@ -363,7 +326,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       g.list.forEach((r, i) => {
         if (i) td.append(document.createTextNode(', '));
         td.append(document.createTextNode(r.items));
-        if (r.src === 'extra') td.append(el('span', 'tag', '추가'));
+        if (r.src === 'extra') td.append(el('span', 'tag', '가족'));
         if (r.src === 'kn') td.append(el('span', 'tag kn', '알림장'));
         if (r.src === 'auto') td.append(el('span', 'tag auto', r.badge || '자동'));
       });
@@ -371,14 +334,12 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     });
 
     const xl = $('extra-list'); xl.replaceChildren();
-    const mine = [...extra].sort((a, b) => a.date.localeCompare(b.date));
-    if (!mine.length) emptyRow(xl, 3, '아직 추가한 준비물이 없어요');
-    mine.forEach((r) => {
-      const tr = el('tr', r.date < today ? 'past' : ''); const del = el('button', 'del', '×'); del.type = 'button'; del.title = '삭제';
-      del.addEventListener('click', () => { extra = extra.filter((x) => x.id !== r.id); saveExtra(extra); renderSupplies(); });
-      const tdd = el('td'); tdd.append(del);
-      tr.append(dateCell(r.date), el('td', null, r.items), tdd); xl.append(tr);
-    });
+    const mine = manual('준비물').filter((r) => r.items && r.date >= today).sort((x, y) => x.date.localeCompare(y.date));
+    if (!mine.length) emptyRow(xl, 2, '앞으로 챙길 가족 추가 준비물이 없어요');
+    mine.forEach((r) => { const tr = el('tr'); tr.append(dateCell(r.date), el('td', 'has', r.items)); xl.append(tr); });
+    const fu = DATA && DATA.formUrl;
+    [['form-btn'], ['poop-form']].forEach(([id]) => { const a = $(id); if (fu) { a.href = fu; a.classList.remove('off'); } else a.classList.add('off'); });
+    $('form-wait').hidden = !!fu;
   }
 
   function render() {
@@ -390,6 +351,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
   function renderLife() {
     if (!DATA) return;
+    const myPoop = manual('응가').map((r) => r.date);
     const al = $('act-list'); al.replaceChildren();
     // 이번 주 월~금 (토·일에는 다음 주)
     const t0 = new Date(today + 'T00:00:00Z'); const wd = t0.getUTCDay();
@@ -420,11 +382,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       }
       const pc = el('td', 'pc'); const pv = poopBy[d];
       if (pv === true) pc.append(el('span', 'poop yes', '💩 했어요'));
-      else if (myPoop.includes(d)) {
-        const x = el('button', 'del', '×'); x.type = 'button'; x.title = '직접 추가한 응가 지우기';
-        x.addEventListener('click', () => { myPoop = myPoop.filter((v) => v !== d); savePoop(); renderLife(); });
-        pc.append(el('span', 'poop yes', '💩 했어요'), el('span', 'tag mine', '직접'), x);
-      }
+      else if (myPoop.includes(d)) pc.append(el('span', 'poop yes', '💩 했어요'), el('span', 'tag mine', '직접'));
       else pc.append(pv === false ? el('span', 'poop no', '안 했어요') : el('span', 'poop na', '-'));
       const mc = el('td', 'pc'); const mv = medBy[d];
       mc.append(mv ? el('span', 'poop ' + (mv === '완료' ? 'med' : 'medw'), mv === '완료' ? '💊 완료' : '💊 요청') : el('span', 'poop na', '-'));
@@ -435,7 +393,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     const poopDays = new Set([...pm.filter((r) => r.done).map((r) => r.date), ...myPoop.filter((d) => d.slice(0, 7) === ym)]);
     const mineCnt = [...poopDays].filter((d) => !pm.some((r) => r.date === d && r.done)).length;
     const mm = (DATA.med || []).filter((r) => r.date.slice(0, 7) === ym);
-    $('poop-sum').textContent = [`💩 이번 달 응가 ${poopDays.size}번` + (mineCnt ? ` (직접 ${mineCnt})` : ''), mm.length ? `💊 투약 ${mm.length}일` : ''].filter(Boolean).join(' · ') + ' · 키즈노트 알림장·투약의뢰서 + 직접 추가 기준';
+    $('poop-sum').textContent = [`💩 이번 달 응가 ${poopDays.size}번` + (mineCnt ? ` (직접 ${mineCnt})` : ''), mm.length ? `💊 투약 ${mm.length}일` : ''].filter(Boolean).join(' · ') + ' · 키즈노트 알림장·투약의뢰서 + 가족 기록 기준';
   }
 
   function renderRest() {
