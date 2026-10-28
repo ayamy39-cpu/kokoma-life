@@ -113,6 +113,22 @@ th.pc, td.pc { text-align: center; width: 5.6em; white-space: nowrap; padding-le
 .padd input { border: 2px solid var(--sand); border-radius: 12px; padding: 5px 8px; background: #fff; font-size: var(--fs-cap); }
 .padd input:focus { outline: none; border-color: var(--accent); }
 .btn.sm { padding: 6px 12px; font-size: var(--fs-cap); }
+.hbtn { margin-left: auto; align-self: center; }
+.card-h h2 { white-space: nowrap; }
+.poop b { font-weight: inherit; }
+.poop .ps { display: none; }
+@media (max-width: 560px) {
+  .hbtn { padding: 5px 10px; font-size: 14px; }
+  .poop { min-width: 0; padding: 1px 6px; }
+  .poop .ps { display: inline; } .poop .pl { display: none; }
+  th.pc, td.pc { width: 2.6em; padding-left: 2px; padding-right: 2px; }
+  td.pc .tag.mine { display: block; margin: 2px 0 0; font-size: 11px; }
+  #act-list td.date .dd { display: block; margin-left: 0; }
+  #hawon-list td, .hl-t th { font-size: 15px; padding: 6px 4px; }
+  #hawon-list td.date { white-space: normal; }
+  .st { min-width: 0; padding: 1px 6px; }
+  td.stc, th.stc { width: auto; }
+}
 .btn.wide { display: block; text-align: center; margin: 0 0 12px; text-decoration: none; }
 a.btn { text-decoration: none; }
 .btn.off { background: #ccc; pointer-events: none; }
@@ -184,9 +200,8 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   <!-- 2행: 생활 / 식사 -->
   <div class="row wl">
     <section class="card">
-      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2></div>
+      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2><a class="btn sm hbtn" id="poop-form" target="_blank" rel="noopener">💩 응가 기록하기</a></div>
       <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
-      <div class="padd"><a class="btn sm" id="poop-form" target="_blank" rel="noopener">💩 응가 기록하기</a></div>
       <table><thead><tr><th>날짜</th><th>활동</th><th class="pc">응가</th><th class="pc">투약</th></tr></thead><tbody id="act-list"></tbody></table>
       <p class="hint" id="poop-sum"></p>
       <p class="hint">※ 알림장에 없는 응가는 가족이 Notion에 기록하면 <span class="tag mine" style="margin:0">직접</span> 표시로 보여요.</p>
@@ -381,11 +396,12 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         });
       }
       const pc = el('td', 'pc'); const pv = poopBy[d];
-      if (pv === true) pc.append(el('span', 'poop yes', '💩 했어요'));
-      else if (myPoop.includes(d)) pc.append(el('span', 'poop yes', '💩 했어요'), el('span', 'tag mine', '직접'));
-      else pc.append(pv === false ? el('span', 'poop no', '안 했어요') : el('span', 'poop na', '-'));
+      const chip = (cls, short, long) => { const c = el('span', 'poop ' + cls); c.append(el('b', 'ps', short), el('b', 'pl', long)); return c; };
+      if (pv === true) pc.append(chip('yes', '💩', '💩 했어요'));
+      else if (myPoop.includes(d)) pc.append(chip('yes', '💩', '💩 했어요'), el('span', 'tag mine', '직접'));
+      else pc.append(pv === false ? chip('no', '✕', '안 했어요') : el('span', 'poop na', '-'));
       const mc = el('td', 'pc'); const mv = medBy[d];
-      mc.append(mv ? el('span', 'poop ' + (mv === '완료' ? 'med' : 'medw'), mv === '완료' ? '💊 완료' : '💊 요청') : el('span', 'poop na', '-'));
+      mc.append(mv ? chip(mv === '완료' ? 'med' : 'medw', '💊', mv === '완료' ? '💊 완료' : '💊 요청') : el('span', 'poop na', '-'));
       tr.append(dateCell(d), td, pc, mc); al.append(tr);
     });
 
