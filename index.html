@@ -114,11 +114,19 @@ th.pc, td.pc { text-align: center; width: 5.6em; white-space: nowrap; padding-le
 .padd input:focus { outline: none; border-color: var(--accent); }
 .btn.sm { padding: 6px 12px; font-size: var(--fs-cap); }
 .hbtn { margin-left: auto; align-self: center; }
+.pbox { display: inline-flex; gap: 6px; align-items: center; }
+.pbox input { border: 2px solid var(--sand); border-radius: 12px; padding: 4px 6px; background: #fff; font-size: var(--fs-cap); max-width: 9.5em; }
+.pbox input:focus, .add input:focus { outline: none; border-color: var(--accent); }
+.msg { font-size: var(--fs-cap); margin: -4px 0 10px; color: #2d7a4a; }
+.msg.err { color: var(--red); }
+.btn:disabled { background: #ccc; cursor: default; }
 .card-h h2 { white-space: nowrap; }
 .poop b { font-weight: inherit; }
 .poop .ps { display: none; }
 @media (max-width: 560px) {
-  .hbtn { padding: 5px 10px; font-size: 14px; }
+  .card-h { flex-wrap: wrap; }
+  .pbox { width: 100%; justify-content: flex-end; margin-top: 4px; }
+  .pbox .btn { padding: 5px 10px; font-size: 14px; }
   .poop { min-width: 0; padding: 1px 6px; }
   .poop .ps { display: inline; } .poop .pl { display: none; }
   th.pc, td.pc { width: 2.6em; padding-left: 2px; padding-right: 2px; }
@@ -189,22 +197,28 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
     <section class="card">
       <div class="card-h"><img class="ch" src="img/teddy.webp" alt=""><h2>추가 준비물</h2></div>
-      <p class="note">가족 누구나 Notion 양식으로 적으면 모두에게 보여요</p>
-      <a class="btn wide" id="form-btn" target="_blank" rel="noopener">📝 준비물·응가 기록하기 (Notion)</a>
-      <p class="hint" id="form-wait" hidden>기록 양식 링크를 연결하는 중이에요.</p>
-      <table><thead><tr><th>날짜</th><th>가족이 추가한 준비물</th></tr></thead><tbody id="extra-list"></tbody></table>
-      <p class="hint">※ Notion에 적은 기록은 몇 시간 안에(하루 4번 자동 갱신) 사이트에 반영돼요. 지우거나 고칠 땐 Notion에서 하면 돼요.</p>
+      <p class="note">가족 누구나 입력하면 Notion에 저장되고 모두에게 보여요 · 날짜는 내일로 자동 입력</p>
+      <div class="add">
+        <input type="date" id="add-date" aria-label="날짜">
+        <input type="text" id="add-text" placeholder="예) 여벌옷, 기저귀 10개" aria-label="준비물" maxlength="60">
+        <button class="btn" id="add-btn" type="button">추가</button>
+      </div>
+      <div class="quick" id="quick"></div>
+      <p class="msg" id="add-msg" hidden></p>
+      <table><thead><tr><th>날짜</th><th>가족이 추가한 준비물</th><th></th></tr></thead><tbody id="extra-list"></tbody></table>
+      <p class="hint">※ 내가 방금 넣은 기록은 24시간 안에 ×로 지울 수 있어요. 그 뒤에는 Notion에서 고쳐 주세요.</p>
     </section>
   </div>
 
   <!-- 2행: 생활 / 식사 -->
   <div class="row wl">
     <section class="card">
-      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2><a class="btn sm hbtn" id="poop-form" target="_blank" rel="noopener">💩 응가 기록하기</a></div>
+      <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2><span class="hbtn pbox"><input type="date" id="poop-date" aria-label="응가 날짜"><button class="btn sm" id="poop-btn" type="button">💩 응가 추가</button></span></div>
+      <p class="msg" id="poop-msg" hidden></p>
       <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
       <table><thead><tr><th>날짜</th><th>활동</th><th class="pc">응가</th><th class="pc">투약</th></tr></thead><tbody id="act-list"></tbody></table>
       <p class="hint" id="poop-sum"></p>
-      <p class="hint">※ 알림장에 없는 응가는 가족이 Notion에 기록하면 <span class="tag mine" style="margin:0">직접</span> 표시로 보여요.</p>
+      <p class="hint">※ 알림장에 없는 응가는 날짜를 골라 <b>💩 응가 추가</b>를 누르면 <span class="tag mine" style="margin:0">직접</span> 표시로 모두에게 보여요.</p>
     </section>
 
     <section class="card">
@@ -272,12 +286,86 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   $('date').textContent = (seoul.getUTCMonth() + 1) + '월 ' + seoul.getUTCDate() + '일 (' + DOW[seoul.getUTCDay()] + ') 🐥';
 
   let DATA = null;
-  const manual = (k) => ((DATA && DATA.manual) || []).filter((r) => r.kind === k);
+  let LIVE = null; // 창구에서 바로 읽어 온 Notion 기록 (있으면 data.json 보다 우선)
+  const added = []; // 이번에 이 화면에서 넣은 기록 (바로 보이게)
+  const manual = (k) => {
+    const base = LIVE || (DATA && DATA.manual) || [];
+    const all = [...base, ...added];
+    const seen = new Set();
+    return all.filter((r) => r.kind === k).filter((r) => { const key = r.date + '|' + r.kind + '|' + (r.items || ''); if (seen.has(key)) return false; seen.add(key); return true; });
+  };
+  // 내가 넣은 기록 id (24시간 안에 지우기용, 이 브라우저에만)
+  const MKEY = 'kkoma-mine-v1';
+  const loadMine = () => { try { const v = JSON.parse(localStorage.getItem(MKEY) || '[]'); return Array.isArray(v) ? v.filter((x) => Date.now() - x.at < 864e5) : []; } catch (e) { return []; } };
+  const saveMine = (v) => { try { localStorage.setItem(MKEY, JSON.stringify(v)); } catch (e) {} };
+  let mine = loadMine();
+  const apiUrl = () => (DATA && DATA.apiUrl) || '';
+  const api = async (body) => {
+    const r = await fetch(apiUrl(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'fail');
+    return j;
+  };
+  const ERR = { too_many: '잠시 후 다시 시도해 주세요', empty_items: '준비물 이름을 적어 주세요', bad_date: '날짜를 골라 주세요' };
+  const say = (id, text, bad) => { const m = $(id); m.textContent = text; m.className = 'msg' + (bad ? ' err' : ''); m.hidden = false; clearTimeout(m._t); m._t = setTimeout(() => { m.hidden = true; }, 4000); };
+
+  async function addRecord(kind, date, items, msgId, btn) {
+    if (!apiUrl()) { say(msgId, '아직 저장 창구가 연결되지 않았어요', true); return false; }
+    btn.disabled = true;
+    try {
+      const j = await api({ action: 'add', kind, date, items });
+      const rec = { date, kind, items: kind === '응가' ? '' : items };
+      added.push(rec);
+      mine.push({ id: j.id, at: Date.now(), ...rec }); saveMine(mine);
+      say(msgId, kind === '응가' ? `💩 ${md(date)} 응가를 기록했어요` : `${md(date)} 준비물 "${items}"을(를) 추가했어요`);
+      return true;
+    } catch (e) {
+      say(msgId, '저장하지 못했어요 · ' + (ERR[e.message] || '잠시 후 다시 시도해 주세요'), true);
+      return false;
+    } finally { btn.disabled = false; }
+  }
+  async function removeRecord(m, msgId) {
+    try {
+      await api({ action: 'delete', id: m.id });
+      mine = mine.filter((x) => x.id !== m.id); saveMine(mine);
+      const i = added.findIndex((r) => r.date === m.date && r.kind === m.kind && r.items === m.items); if (i >= 0) added.splice(i, 1);
+      if (LIVE) { const k = LIVE.findIndex((r) => r.date === m.date && r.kind === m.kind && (r.items || '') === (m.items || '')); if (k >= 0) LIVE.splice(k, 1); }
+      say(msgId, '지웠어요');
+    } catch (e) { say(msgId, '지우지 못했어요 · ' + (e.message === 'too_old' ? '24시간이 지나 Notion에서 지워 주세요' : '잠시 후 다시 시도해 주세요'), true); }
+    renderSupplies(); renderLife();
+  }
+  const myRec = (r) => mine.find((x) => x.date === r.date && x.kind === r.kind && (x.items || '') === (r.items || ''));
+
+  // 입력칸
+  const addDate = $('add-date'), addText = $('add-text');
+  addDate.value = tomorrow; addDate.min = today;
+  const doAdd = async (text) => {
+    const t = (text ?? addText.value).trim(); const d = addDate.value;
+    if (!t) { addText.focus(); return; }
+    if (await addRecord('준비물', d, t, 'add-msg', $('add-btn'))) { addText.value = ''; addDate.value = tomorrow; renderSupplies(); }
+  };
+  $('add-btn').addEventListener('click', () => doAdd());
+  addText.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) doAdd(); });
+  ['여벌옷', '기저귀', '물티슈', '낮잠이불', '약 / 투약의뢰서'].forEach((q) => {
+    const c = el('button', 'chip', '+ ' + q); c.type = 'button'; c.addEventListener('click', () => doAdd(q)); $('quick').append(c);
+  });
+  const poopDate = $('poop-date'); poopDate.value = today; poopDate.max = today;
+  $('poop-btn').addEventListener('click', async () => {
+    if (await addRecord('응가', poopDate.value, '', 'poop-msg', $('poop-btn'))) { poopDate.value = today; renderLife(); }
+  });
+
+  // 창구에서 최신 기록 읽기 (실패하면 data.json 값 사용)
+  const loadLive = () => {
+    if (!apiUrl()) return;
+    fetch(apiUrl() + '?action=list&t=' + Date.now()).then((r) => r.json()).then((j) => {
+      if (j && j.ok && Array.isArray(j.items)) { LIVE = j.items; renderSupplies(); renderLife(); }
+    }).catch(() => {});
+  };
 
   /* ---------- 데이터 ---------- */
   fetch('data.json?v=' + Date.now(), { cache: 'no-store' })
     .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then((d) => { DATA = d; render(); })
+    .then((d) => { DATA = d; render(); loadLive(); })
     .catch(() => { $('takeaway').textContent = '데이터를 불러오지 못했어요. 잠시 후 새로고침해 주세요.'; renderSupplies(); });
 
   // 대한민국 공휴일(대체공휴일 포함) 2026~2027
@@ -349,12 +437,15 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     });
 
     const xl = $('extra-list'); xl.replaceChildren();
-    const mine = manual('준비물').filter((r) => r.items && r.date >= today).sort((x, y) => x.date.localeCompare(y.date));
-    if (!mine.length) emptyRow(xl, 2, '앞으로 챙길 가족 추가 준비물이 없어요');
-    mine.forEach((r) => { const tr = el('tr'); tr.append(dateCell(r.date), el('td', 'has', r.items)); xl.append(tr); });
-    const fu = DATA && DATA.formUrl;
-    [['form-btn'], ['poop-form']].forEach(([id]) => { const a = $(id); if (fu) { a.href = fu; a.classList.remove('off'); } else a.classList.add('off'); });
-    $('form-wait').hidden = !!fu;
+    const fam = manual('준비물').filter((r) => r.items && r.date >= today).sort((x, y) => x.date.localeCompare(y.date));
+    if (!fam.length) emptyRow(xl, 3, '앞으로 챙길 가족 추가 준비물이 없어요');
+    fam.forEach((r) => {
+      const tr = el('tr'); const tdd = el('td'); const m = myRec(r);
+      if (m) { const x = el('button', 'del', '×'); x.type = 'button'; x.title = '내가 넣은 기록 지우기'; x.addEventListener('click', () => removeRecord(m, 'add-msg')); tdd.append(x); }
+      tr.append(dateCell(r.date), el('td', 'has', r.items), tdd); xl.append(tr);
+    });
+    const ready = !!apiUrl();
+    ['add-btn', 'poop-btn'].forEach((id) => { $(id).disabled = !ready; $(id).title = ready ? '' : '저장 창구 연결 전이에요'; });
   }
 
   function render() {
@@ -398,7 +489,11 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       const pc = el('td', 'pc'); const pv = poopBy[d];
       const chip = (cls, short, long) => { const c = el('span', 'poop ' + cls); c.append(el('b', 'ps', short), el('b', 'pl', long)); return c; };
       if (pv === true) pc.append(chip('yes', '💩', '💩 했어요'));
-      else if (myPoop.includes(d)) pc.append(chip('yes', '💩', '💩 했어요'), el('span', 'tag mine', '직접'));
+      else if (myPoop.includes(d)) {
+        pc.append(chip('yes', '💩', '💩 했어요'), el('span', 'tag mine', '직접'));
+        const m = myRec({ date: d, kind: '응가', items: '' });
+        if (m) { const x = el('button', 'del', '×'); x.type = 'button'; x.title = '내가 넣은 응가 지우기'; x.addEventListener('click', () => removeRecord(m, 'poop-msg')); pc.append(x); }
+      }
       else pc.append(pv === false ? chip('no', '✕', '안 했어요') : el('span', 'poop na', '-'));
       const mc = el('td', 'pc'); const mv = medBy[d];
       mc.append(mv ? chip(mv === '완료' ? 'med' : 'medw', '💊', mv === '완료' ? '💊 완료' : '💊 요청') : el('span', 'poop na', '-'));
