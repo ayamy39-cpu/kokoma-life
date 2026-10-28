@@ -108,6 +108,13 @@ th.pc, td.pc { text-align: center; width: 5.6em; white-space: nowrap; padding-le
 .poop.yes { background: #FFE3B3; color: #8a4b00; }
 .poop.no { background: #F2F2F2; color: var(--muted); }
 .poop.na { color: #c8c8c8; }
+.padd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin: -4px 0 8px; }
+.padd-l { font-size: var(--fs-cap); color: var(--muted); }
+.padd input { border: 2px solid var(--sand); border-radius: 12px; padding: 5px 8px; background: #fff; font-size: var(--fs-cap); }
+.padd input:focus { outline: none; border-color: var(--accent); }
+.btn.sm { padding: 6px 12px; font-size: var(--fs-cap); }
+.tag.mine { background: #FFF3B0; color: #7a6200; margin-left: 4px; }
+td.pc .del { font-size: 15px; padding: 0 0 0 2px; }
 .poop.med { background: #E3ECFF; color: #2a5bb8; }
 .poop.medw { background: #FFE0E0; color: #b23a3e; }
 .st.done { color: var(--muted); background: #F4F4F4; }
@@ -180,8 +187,14 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     <section class="card">
       <div class="card-h"><img class="ch" src="img/question.webp" alt=""><h2 id="act-title">이번주 생활</h2></div>
       <p class="note" id="act-note">월간계획표 기준 · 월~금</p>
+      <div class="padd">
+        <span class="padd-l">💩 응가 추가</span>
+        <input type="date" id="poop-date" aria-label="응가 날짜">
+        <button class="btn sm" id="poop-btn" type="button">추가</button>
+      </div>
       <table><thead><tr><th>날짜</th><th>활동</th><th class="pc">응가</th><th class="pc">투약</th></tr></thead><tbody id="act-list"></tbody></table>
       <p class="hint" id="poop-sum"></p>
+      <p class="hint">※ 직접 추가한 응가(<span class="tag mine" style="margin:0">직접</span>)는 이 휴대폰(브라우저)에만 저장돼요. 지우려면 ×를 누르세요.</p>
     </section>
 
     <section class="card">
@@ -269,6 +282,18 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   addText.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) doAdd(); });
   ['여벌옷', '기저귀', '물티슈', '낮잠이불', '약 / 투약의뢰서'].forEach((q) => {
     const c = el('button', 'chip', '+ ' + q); c.type = 'button'; c.addEventListener('click', () => doAdd(q)); $('quick').append(c);
+  });
+
+  /* ---------- 직접 추가 응가 (이 브라우저에 저장) ---------- */
+  const PKEY = 'kkoma-poop-v1';
+  let myPoop = (() => { try { const v = JSON.parse(localStorage.getItem(PKEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } })();
+  const savePoop = () => { try { localStorage.setItem(PKEY, JSON.stringify(myPoop)); } catch (e) {} };
+  const poopDate = $('poop-date'); poopDate.value = today; poopDate.max = today;
+  $('poop-btn').addEventListener('click', () => {
+    const d = poopDate.value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+    if (!myPoop.includes(d)) { myPoop.push(d); myPoop.sort(); savePoop(); }
+    poopDate.value = today; renderLife();
   });
 
   /* ---------- 데이터 ---------- */
@@ -359,7 +384,12 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   function render() {
     renderSupplies();
 
-    // 활동
+    renderLife();
+    renderRest();
+  }
+
+  function renderLife() {
+    if (!DATA) return;
     const al = $('act-list'); al.replaceChildren();
     // 이번 주 월~금 (토·일에는 다음 주)
     const t0 = new Date(today + 'T00:00:00Z'); const wd = t0.getUTCDay();
@@ -389,15 +419,26 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         });
       }
       const pc = el('td', 'pc'); const pv = poopBy[d];
-      pc.append(pv === true ? el('span', 'poop yes', '💩 했어요') : pv === false ? el('span', 'poop no', '안 했어요') : el('span', 'poop na', '-'));
+      if (pv === true) pc.append(el('span', 'poop yes', '💩 했어요'));
+      else if (myPoop.includes(d)) {
+        const x = el('button', 'del', '×'); x.type = 'button'; x.title = '직접 추가한 응가 지우기';
+        x.addEventListener('click', () => { myPoop = myPoop.filter((v) => v !== d); savePoop(); renderLife(); });
+        pc.append(el('span', 'poop yes', '💩 했어요'), el('span', 'tag mine', '직접'), x);
+      }
+      else pc.append(pv === false ? el('span', 'poop no', '안 했어요') : el('span', 'poop na', '-'));
       const mc = el('td', 'pc'); const mv = medBy[d];
       mc.append(mv ? el('span', 'poop ' + (mv === '완료' ? 'med' : 'medw'), mv === '완료' ? '💊 완료' : '💊 요청') : el('span', 'poop na', '-'));
       tr.append(dateCell(d), td, pc, mc); al.append(tr);
     });
 
     const pm = (DATA.poop || []).filter((r) => r.date.slice(0, 7) === ym);
+    const poopDays = new Set([...pm.filter((r) => r.done).map((r) => r.date), ...myPoop.filter((d) => d.slice(0, 7) === ym)]);
+    const mineCnt = [...poopDays].filter((d) => !pm.some((r) => r.date === d && r.done)).length;
     const mm = (DATA.med || []).filter((r) => r.date.slice(0, 7) === ym);
-    $('poop-sum').textContent = [pm.length ? `💩 이번 달 응가 ${pm.filter((r) => r.done).length}번 / 알림장 ${pm.length}일` : '', mm.length ? `💊 투약 ${mm.length}일` : ''].filter(Boolean).join(' · ') + ' · 키즈노트 알림장·투약의뢰서 기준';
+    $('poop-sum').textContent = [`💩 이번 달 응가 ${poopDays.size}번` + (mineCnt ? ` (직접 ${mineCnt})` : ''), mm.length ? `💊 투약 ${mm.length}일` : ''].filter(Boolean).join(' · ') + ' · 키즈노트 알림장·투약의뢰서 + 직접 추가 기준';
+  }
+
+  function renderRest() {
 
     // 식단
     const SLOT = { '오전간식': ['s1', '🍓'], '점심': ['s2', '🍚'], '오후간식': ['s3', '🧁'], '저녁': ['s4', '🌙'] };
