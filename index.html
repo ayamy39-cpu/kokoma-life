@@ -401,7 +401,13 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     const plan = ((DATA && DATA.plan) || []).filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'plan' }));
     const ex = manual('준비물').filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'extra' }));
     const rq = ((DATA && DATA.requests) || []).map((r) => ({ date: r.date, items: r.items, src: 'kn' }));
-    return [...plan, ...rq, ...toothbrush(), ...ex].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
+    // 같은 날 알림장 요청과 겹치는 준비물(계획표·자동·가족)은 알림장 기준으로 하나만 보여줌
+    const STOP = new Set(['원', '줄', '나눠', '나누어', '친구들에게', '친구', '보내기', '입히기', '포장한', '개', '이름표']);
+    const words = (t) => (t || '').replace(/할로원/g, '할로윈').replace(/[()\d]/g, ' ').split(/[\s,·/&]+/).map((w) => w.trim()).filter((w) => w.length >= 2 && !STOP.has(w));
+    const knWords = {};
+    rq.forEach((r) => { (knWords[r.date] = knWords[r.date] || new Set()); words(r.items).forEach((w) => knWords[r.date].add(w)); });
+    const dup = (r) => { const k = knWords[r.date]; return !!k && words(r.items).some((w) => k.has(w) || [...k].some((x) => x.includes(w) || w.includes(x))); };
+    return [...plan.filter((r) => !dup(r)), ...rq, ...toothbrush().filter((r) => !dup(r)), ...ex.filter((r) => !dup(r))].sort((a, b) => a.date.localeCompare(b.date) || a.src.localeCompare(b.src));
   }
 
   function renderSupplies() {
