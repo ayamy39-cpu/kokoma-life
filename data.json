@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-03T15:10:00+09:00",
+ "updatedAt": "2026-11-05T10:21:45+09:00",
  "plan": [
   {
    "date": "2026-10-05",
@@ -1348,6 +1348,11 @@
    "id": "_8krjge9l6kpjaba364s30b9k611jeba2711jib9o711j8d1p6csj0dhi64",
    "start": "2026-11-02T19:40:00+09:00",
    "title": "(하원) 현영/19시40분"
+  },
+  {
+   "id": "6dhj0cj2cgpmab9o65j3gb9k71gm6bb2clgj6bb5ckpjap9gckr3ap1j74",
+   "start": "2026-11-04T19:40:00+09:00",
+   "title": "(하원) 지형/19시40분"
   }
  ],
  "activities": [
