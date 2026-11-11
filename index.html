@@ -151,6 +151,7 @@ td.pc .del { font-size: 15px; padding: 0 0 0 2px; }
 .st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
 .st.early { color: #b26a00; background: #FFF4D6; border-color: #F5DFA3; }
 .st.none { color: #b23a3e; background: #FFF0F0; border-color: #F6CFCF; }
+.st.extra { color: #2F6FE4; background: #EEF3FD; border-color: #C9D8F6; }
 .sub { background: #FFFFFF; border: 1px solid #EEEEEE; border-radius: 18px; padding: 14px; min-width: 0; }
 
 .chart { position: relative; }
@@ -254,7 +255,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         <div class="chart" id="chart"></div>
       </div>
       <div class="sub">
-        <h3>이번 달 늦은 하원 목록 (계획)</h3>
+        <h3>이번 달 늦은 하원 목록 (지난날: 계획+실제 · 오늘 이후: 계획)</h3>
         <p class="note">실제 = 키즈노트 하원 알림 시각</p>
         <table><thead><tr><th>계획</th><th>담당</th><th>실제</th><th class="stc">상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
       </div>
@@ -556,10 +557,16 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     $('takeaway').textContent = `이번 달 늦은 하원 계획 ${planned}개 · 실제 ${actualCur}번 · 남은 계획 ${upcoming}개`;
 
     const hl = $('hawon-list'); hl.replaceChildren();
-    const list = planM.slice().sort((x, y) => x.start.localeCompare(y.start));
+    const planDays = new Set(planM.map((r) => r.start.slice(0, 10)));
+    const extra = lateDays.filter((d) => d.slice(0, 7) === ym && d <= today && !planDays.has(d)).map((d) => ({ start: d, extra: true }));
+    const list = planM.concat(extra).sort((x, y) => x.start.localeCompare(y.start));
     if (!list.length) emptyRow(hl, 4, '이번 달 늦은 하원 계획이 없어요');
     list.forEach((r) => {
       const d = r.start.slice(0, 10); const pt = picks[d];
+      if (r.extra) {
+        const tr = el('tr'); const st = el('td', 'stc'); st.append(el('span', 'st extra', '계획외'));
+        tr.append(el('td', 'date', md(d) + ' -'), el('td', 'date', '-'), el('td', 'date', pt), st); hl.append(tr); return;
+      }
       const state = d > today || (d === today && !pt) ? (d === today ? '오늘' : '예정') : pt ? (late(pt) ? '완료' : '일찍') : (d < since ? '-' : '기록없음');
       const who = r.title.replace(/^\(하원\)\s*/, '').replace(/\/\s*\d+시\s*\d*분?\s*$/, '');
       const tr = el('tr'); const st = el('td', 'stc');
