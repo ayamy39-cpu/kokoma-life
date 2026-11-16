@@ -1,5 +1,5 @@
 {
- "updatedAt": "2026-11-16T09:10:00+09:00",
+ "updatedAt": "2026-11-16T09:15:00+09:00",
  "plan": [
   {
    "date": "2026-10-05",
@@ -1353,6 +1353,26 @@
    "id": "6dhj0cj2cgpmab9o65j3gb9k71gm6bb2clgj6bb5ckpjap9gckr3ap1j74",
    "start": "2026-11-04T19:40:00+09:00",
    "title": "(하원) 지형/19시40분"
+  },
+  {
+   "id": "ckojao9h70s3cb9mc4p30b9k6so32b9pccp6cb9l70p3cp9l6cpj4e1mcc",
+   "start": "2026-11-10T19:40:00+09:00",
+   "title": "(하원) 지형/19시40분"
+  },
+  {
+   "id": "70q3aeb26kqjab9h6tgj4b9kc5gjab9p74sjcb9h61j34cpm6hh66or4cg",
+   "start": "2026-11-11T19:40:00+09:00",
+   "title": "(하원) 지형/19시40분"
+  },
+  {
+   "id": "_8d2jadhn6gr3ab9m752jgb9k8oskcba26933eba66oo38h248op34da388",
+   "start": "2026-11-16T19:40:00+09:00",
+   "title": "(하원) 현영/19시40분"
+  },
+  {
+   "id": "_6533cdi68p0jgb9i6d0jeb9k60pk2b9p8kr4aba584rjec228h34cdpp6c",
+   "start": "2026-11-18T19:40:00+09:00",
+   "title": "(하원) 현영/19시40분"
   }
  ],
  "activities": [
