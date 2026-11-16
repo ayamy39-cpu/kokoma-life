@@ -151,6 +151,9 @@ td.pc .del { font-size: 15px; padding: 0 0 0 2px; }
 .st.today { color: #fff; background: var(--accent); border-color: var(--accent); }
 .st.early { color: #b26a00; background: #FFF4D6; border-color: #F5DFA3; }
 .st.none { color: #b23a3e; background: #FFF0F0; border-color: #F6CFCF; }
+.st.plan { color: #2F6FE4; background: #EEF3FD; border-color: #C9D8F6; }
+button.st.fix { cursor: pointer; font-family: inherit; color: #b23a3e; background: #FFF0F0; border-color: #F6CFCF; }
+button.st.fix:disabled { opacity: .5; }
 .st.extra { color: #2F6FE4; background: #EEF3FD; border-color: #C9D8F6; }
 .sub { background: #FFFFFF; border: 1px solid #EEEEEE; border-radius: 18px; padding: 14px; min-width: 0; }
 
@@ -237,15 +240,15 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   <!-- 3행: 늦은 하원 -->
   <section class="card">
     <div class="card-h"><img class="ch" src="img/cheeks.webp" alt=""><h2>늦은 하원 일정 (19:40 이후)</h2></div>
-    <p class="note">계획 = 구글 캘린더 (하원) 일정 중 19:40 이후 · 실제 = 키즈노트 하원 알림 19:40 이후 · 8개 이상 파란색, 미만 빨간색</p>
+    <p class="note">실제 = 키즈노트 하원 알림 19:40 이후 + 가족이 완료 처리한 날 · 이번 달 계획 = 오늘까지 실제 + 앞으로 남은 캘린더 (하원) 일정(19:40 이후) · 8개 이상 파란색, 미만 빨간색</p>
     <div class="tiles">
+      <div class="tile"><div class="lbl">오늘까지 실제 늦은 하원</div><div class="num" id="done">—</div></div>
       <div class="tile">
         <div class="lbl">이번 달 늦은 하원(계획)</div>
         <div class="num" id="planned">—</div>
         <span class="badge" id="badge" hidden></span>
         <img class="ch mascot" id="mascot" alt="" hidden>
       </div>
-      <div class="tile"><div class="lbl">오늘까지 실제 늦은 하원</div><div class="num" id="done">—</div></div>
       <div class="tile"><div class="lbl">남은 늦은 하원(계획)</div><div class="num" id="left">—</div></div>
     </div>
     <div class="row">
@@ -255,9 +258,10 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         <div class="chart" id="chart"></div>
       </div>
       <div class="sub">
-        <h3>이번 달 늦은 하원 목록 (지난날: 계획+실제 · 오늘 이후: 계획)</h3>
-        <p class="note">실제 = 키즈노트 하원 알림 시각</p>
-        <table><thead><tr><th>계획</th><th>담당</th><th>실제</th><th class="stc">상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
+        <h3>이번 달 늦은 하원 목록</h3>
+        <p class="note">완료 = 실제 늦은 하원 · 계획 = 아직 전 · 지난 계획인데 알림이 없으면 <b>계획 → 완료</b>를 눌러 주세요 (가족 모두에게 보여요)</p>
+        <p class="msg" id="hawon-msg" hidden></p>
+        <table><thead><tr><th>계획</th><th style="white-space:nowrap">담당</th><th>실제</th><th class="stc">상태</th></tr></thead><tbody id="hawon-list"></tbody></table>
       </div>
     </div>
   </section>
@@ -292,13 +296,14 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   $('date').textContent = (seoul.getUTCMonth() + 1) + '월 ' + seoul.getUTCDate() + '일 (' + DOW[seoul.getUTCDay()] + ') 🐥';
 
   let DATA = null;
+  const HMARK = '[늦은하원완료]'; // 가족 기록 창구에 '늦은 하원 완료 처리'를 남기는 표시
   let LIVE = null; // 창구에서 바로 읽어 온 Notion 기록 (있으면 data.json 보다 우선)
   const added = []; // 이번에 이 화면에서 넣은 기록 (바로 보이게)
   const manual = (k) => {
     const base = LIVE || (DATA && DATA.manual) || [];
     const all = [...base, ...added];
     const seen = new Set();
-    return all.filter((r) => r.kind === k).filter((r) => { const key = r.date + '|' + r.kind + '|' + (r.items || ''); if (seen.has(key)) return false; seen.add(key); return true; });
+    return all.map((r) => (r.kind === '준비물' && r.items === HMARK ? { ...r, kind: '하원완료' } : r)).filter((r) => r.kind === k).filter((r) => { const key = r.date + '|' + r.kind + '|' + (r.items || ''); if (seen.has(key)) return false; seen.add(key); return true; });
   };
   // 내가 넣은 기록 id (24시간 안에 지우기용, 이 브라우저에만)
   const MKEY = 'kkoma-mine-v1';
@@ -323,7 +328,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       const rec = { date, kind, items: kind === '응가' ? '' : items };
       added.push(rec);
       mine.push({ id: j.id, at: Date.now(), ...rec }); saveMine(mine);
-      say(msgId, kind === '응가' ? `💩 ${md(date)} 응가를 기록했어요` : `${md(date)} 준비물 "${items}"을(를) 추가했어요`);
+      say(msgId, kind === '응가' ? `💩 ${md(date)} 응가를 기록했어요` : items === HMARK ? `${md(date)} 늦은 하원을 완료로 바꿨어요` : `${md(date)} 준비물 "${items}"을(를) 추가했어요`);
       return true;
     } catch (e) {
       say(msgId, '저장하지 못했어요 · ' + (ERR[e.message] || '잠시 후 다시 시도해 주세요'), true);
@@ -338,7 +343,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       if (LIVE) { const k = LIVE.findIndex((r) => r.date === m.date && r.kind === m.kind && (r.items || '') === (m.items || '')); if (k >= 0) LIVE.splice(k, 1); }
       say(msgId, '지웠어요');
     } catch (e) { say(msgId, '지우지 못했어요 · ' + (e.message === 'too_old' ? '24시간이 지나 Notion에서 지워 주세요' : '잠시 후 다시 시도해 주세요'), true); }
-    renderSupplies(); renderLife();
+    renderSupplies(); renderLife(); if (DATA) renderHawon();
   }
   const myRec = (r) => mine.find((x) => x.date === r.date && x.kind === r.kind && (x.items || '') === (r.items || ''));
 
@@ -364,7 +369,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   const loadLive = () => {
     if (!apiUrl()) return;
     fetch(apiUrl() + '?action=list&t=' + Date.now()).then((r) => r.json()).then((j) => {
-      if (j && j.ok && Array.isArray(j.items)) { LIVE = j.items; renderSupplies(); renderLife(); }
+      if (j && j.ok && Array.isArray(j.items)) { LIVE = j.items; renderSupplies(); renderLife(); if (DATA) renderHawon(); }
     }).catch(() => {});
   };
 
@@ -531,11 +536,16 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
       td.append(el('span', 'slot ' + c, ic + ' ' + r.slot)); tr.append(td, el('td', null, r.menu)); mt.append(tr);
     });
 
-    // 늦은 하원
+    renderHawon();
+  }
+
+  function renderHawon() {
     const late = (t) => t >= '19:40';
     const ev = (DATA.hawon || []).filter((r) => (r.title || '').trim().startsWith('(하원)') && r.start.length > 10 && late(r.start.slice(11, 16)));
     const picks = {}; (DATA.pickups || []).forEach((p) => { picks[p.date] = p.time; });
-    const lateDays = Object.keys(picks).filter((d) => late(picks[d]));
+    const fixed = new Set(manual('하원완료').map((r) => r.date)); // 가족이 완료 처리한 날
+    const lateDays = [...new Set([...Object.keys(picks).filter((d) => late(picks[d])), ...[...fixed].filter((d) => d <= today)])];
+    const isDone = (d) => lateDays.includes(d);
     const since = DATA.pickupsSince || '9999-12-31';
     const months = [];
     for (let i = -3; i <= 0; i++) months.push(iso(new Date(Date.UTC(seoul.getUTCFullYear(), seoul.getUTCMonth() + i, 1))).slice(0, 7));
@@ -545,38 +555,50 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
         coverage: last < since ? 'none' : (m + '-01') < since ? 'partial' : 'full' };
     });
     const planM = ev.filter((r) => r.start.slice(0, 7) === ym);
-    const planned = planM.length;
-    const upcoming = planM.filter((r) => new Date(r.start) >= now).length;
-    const actualCur = lateDays.filter((d) => d.slice(0, 7) === ym).length;
+    const planByDay = {}; planM.forEach((r) => { const d = r.start.slice(0, 10); if (!planByDay[d]) planByDay[d] = r; });
+    const actualCur = lateDays.filter((d) => d.slice(0, 7) === ym && d <= today).length;
+    // 앞으로 남은 계획: 오늘 이후(오늘 포함) 캘린더 일정 중 아직 완료되지 않은 날
+    const upcoming = Object.keys(planByDay).filter((d) => d >= today && !isDone(d)).length;
+    const planned = actualCur + upcoming;
     const ok = planned >= 8;
     $('planned').textContent = planned + '개'; $('planned').className = 'num ' + (ok ? 'blue' : 'red');
     $('done').textContent = actualCur + '개'; $('left').textContent = upcoming + '개';
     const b = $('badge'); b.hidden = false; b.className = 'badge ' + (ok ? 'blue' : 'red');
     b.textContent = ok ? '8개 이상 · 충분해요!' : `8개 미만 · ${8 - planned}개 부족`;
     const ms = $('mascot'); ms.src = ok ? 'img/cheeks.webp' : 'img/question.webp'; ms.hidden = false;
-    $('takeaway').textContent = `이번 달 늦은 하원 계획 ${planned}개 · 실제 ${actualCur}번 · 남은 계획 ${upcoming}개`;
+    $('takeaway').textContent = `이번 달 늦은 하원 실제 ${actualCur}번 · 계획 ${planned}개 · 남은 계획 ${upcoming}개`;
 
     const hl = $('hawon-list'); hl.replaceChildren();
-    const planDays = new Set(planM.map((r) => r.start.slice(0, 10)));
-    const extra = lateDays.filter((d) => d.slice(0, 7) === ym && d <= today && !planDays.has(d)).map((d) => ({ start: d, extra: true }));
-    const list = planM.concat(extra).sort((x, y) => x.start.localeCompare(y.start));
-    if (!list.length) emptyRow(hl, 4, '이번 달 늦은 하원 계획이 없어요');
-    list.forEach((r) => {
-      const d = r.start.slice(0, 10); const pt = picks[d];
-      if (r.extra) {
-        const tr = el('tr'); const st = el('td', 'stc'); st.append(el('span', 'st extra', '계획외'));
-        tr.append(el('td', 'date', md(d) + ' -'), el('td', 'date', '-'), el('td', 'date', pt), st); hl.append(tr); return;
-      }
-      const state = d > today || (d === today && !pt) ? (d === today ? '오늘' : '예정') : pt ? (late(pt) ? '완료' : '일찍') : (d < since ? '-' : '기록없음');
-      const who = r.title.replace(/^\(하원\)\s*/, '').replace(/\/\s*\d+시\s*\d*분?\s*$/, '');
+    const days = [...new Set([...Object.keys(planByDay), ...lateDays.filter((d) => d.slice(0, 7) === ym && d <= today)])].sort();
+    if (!days.length) emptyRow(hl, 4, '이번 달 늦은 하원 계획이 없어요');
+    days.forEach((d) => {
+      const r = planByDay[d]; const pt = picks[d];
+      const who = r ? r.title.replace(/^\(하원\)\s*/, '').replace(/\/\s*\d+시\s*\d*분?\s*$/, '') : '-';
       const tr = el('tr'); const st = el('td', 'stc');
-      st.append(el('span', 'st ' + ({ '완료': 'done', '오늘': 'today', '일찍': 'early', '기록없음': 'none' }[state] || ''), state));
-      tr.append(el('td', 'date', md(d) + ' ' + r.start.slice(11, 16)), el('td', 'date', who), el('td', 'date', pt || '-'), st);
+      if (isDone(d)) {
+        st.append(el('span', 'st done', '완료'));
+      } else if (d >= today) {
+        st.append(el('span', 'st plan', '계획'));
+      } else {
+        const btn = el('button', 'st fix', '계획 → 완료'); btn.type = 'button';
+        btn.title = '키즈노트 알림이 없었지만 늦은 하원을 했다면 눌러 주세요';
+        btn.addEventListener('click', async () => {
+          if (!confirm(`${md(d)} 늦은 하원을 완료로 바꿀까요?\n(가족 모두에게 완료로 보여요)`)) return;
+          if (await addRecord('준비물', d, HMARK, 'hawon-msg', btn)) renderHawon();
+        });
+        if (!apiUrl()) btn.disabled = true;
+        st.append(btn);
+      }
+      const m = fixed.has(d) && !(pt && late(pt)) ? myRec({ date: d, kind: '준비물', items: HMARK }) : null;
+      if (m) { const x = el('button', 'del', '×'); x.type = 'button'; x.title = '완료 처리 취소'; x.addEventListener('click', () => removeRecord(m, 'hawon-msg')); st.append(x); }
+      const actualTxt = pt ? pt : fixed.has(d) ? '가족 확인' : '-';
+      tr.append(el('td', 'date', md(d) + ' ' + (r ? r.start.slice(11, 16) : '-')), el('td', 'date', who), el('td', 'date', actualTxt), st);
       hl.append(tr);
     });
 
     drawChart(byMonth);
-    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawChart(byMonth), 150); });
+    window._hm = byMonth;
+    if (!window._hr) { window._hr = 1; let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawChart(window._hm), 150); }); }
 
     if (DATA.updatedAt) {
       const u = new Date(new Date(DATA.updatedAt).getTime() + SEOUL);
