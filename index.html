@@ -411,7 +411,8 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
   function allSupplies() {
     const plan = ((DATA && DATA.plan) || []).filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'plan' }));
     const ex = manual('준비물').filter((r) => r.items).map((r) => ({ date: r.date, items: r.items, src: 'extra' }));
-    const rq = ((DATA && DATA.requests) || []).map((r) => ({ date: r.date, items: r.items, src: 'kn' }));
+    // moveTo: 가족이 옮긴 날짜, label: 가족이 바꾼 이름 (원래 date/items 는 자동 갱신 중복 방지용으로 유지)
+    const rq = ((DATA && DATA.requests) || []).map((r) => ({ date: r.moveTo || r.date, items: r.label || r.items, src: 'kn' }));
     // 같은 날 알림장 요청과 겹치는 준비물(계획표·자동·가족)은 알림장 기준으로 하나만 보여줌
     const STOP = new Set(['원', '줄', '나눠', '나누어', '친구들에게', '친구', '보내기', '입히기', '포장한', '개', '이름표']);
     const words = (t) => (t || '').replace(/할로원/g, '할로윈').replace(/[()\d]/g, ' ').split(/[\s,·/&]+/).map((w) => w.trim()).filter((w) => w.length >= 2 && !STOP.has(w));
