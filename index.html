@@ -371,6 +371,10 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
     fetch(apiUrl() + '?action=list&t=' + Date.now()).then((r) => r.json()).then((j) => {
       if (j && j.ok && Array.isArray(j.items)) { LIVE = j.items; renderSupplies(); renderLife(); if (DATA) renderHawon(); }
     }).catch(() => {});
+    // 구글 캘린더 (하원) 일정을 창구에서 바로 읽기 (실패하면 data.json 값 사용)
+    fetch(apiUrl() + '?action=hawon&t=' + Date.now()).then((r) => r.json()).then((j) => {
+      if (j && j.ok && Array.isArray(j.items) && DATA) { DATA.hawon = j.items; renderHawon(); }
+    }).catch(() => {});
   };
 
   /* ---------- 데이터 ---------- */
@@ -603,7 +607,7 @@ footer { text-align: center; color: var(--muted); font-size: var(--fs-cap); padd
 
     if (DATA.updatedAt) {
       const u = new Date(new Date(DATA.updatedAt).getTime() + SEOUL);
-      $('updated').textContent = `마지막 갱신 ${u.getUTCMonth() + 1}/${u.getUTCDate()} ${String(u.getUTCHours()).padStart(2, '0')}:${String(u.getUTCMinutes()).padStart(2, '0')} · 하원 계획 매일 아침, 키즈노트 기록 평일 오후 4시 자동 갱신`;
+      $('updated').textContent = `마지막 갱신 ${u.getUTCMonth() + 1}/${u.getUTCDate()} ${String(u.getUTCHours()).padStart(2, '0')}:${String(u.getUTCMinutes()).padStart(2, '0')} · 하원 계획은 캘린더에서 바로 읽음, 키즈노트 기록 평일 10시·16시 자동 갱신`;
     }
   }
 
